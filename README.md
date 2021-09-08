@@ -1,10 +1,10 @@
-# SushiSwap
+# PolyCityDex
 
-https://sushi.com/
+https://pichi.com/
 
 ## Deployed Contracts
 
-https://dev.sushi.com/sushiswap/contracts
+https://dev.pichi.com/polycity/contracts
 
 ## Docs
 

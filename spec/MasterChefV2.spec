@@ -11,7 +11,7 @@
 // Declaration of contracts used in the sepc 
 using DummyERC20A as tokenA
 using DummyERC20B as tokenB
-using DummySUSHI as sushiToken
+using DummyPICHI as polyCityToken
 
 /*
  * Declaration of methods that are used in the rules.
@@ -24,7 +24,7 @@ methods {
 	userInfoRewardDebt(uint256 pid, address user) returns (int256) envfree 
 	userLpTokenBalanceOf(uint256 pid, address user) returns (uint256) envfree
 
-	poolInfoAccSushiPerShare(uint256 pid) returns (uint128) envfree
+	poolInfoAccPichiPerShare(uint256 pid) returns (uint128) envfree
 	poolInfoLastRewardBlock(uint256 pid) returns (uint64) envfree
 	poolInfoAllocPoint(uint256 pid) returns (uint64) envfree
 	totalAllocPoint() returns (uint256) envfree
@@ -49,11 +49,11 @@ methods {
 	lpTokenLength() returns (uint256) envfree
 	rewarderLength() returns (uint256) envfree
 
-	// SUSHI token
-	SUSHI() returns (address) envfree
+	// PICHI token
+	PICHI() returns (address) envfree
 
 	// Rewarder
-	onSushiReward(uint256, address, address, uint256, uint256) => NONDET
+	onPichiReward(uint256, address, address, uint256, uint256) => NONDET
 
 	// MasterChefV1
 	deposit(uint256 pid, uint256 amount) => NONDET
@@ -114,17 +114,17 @@ rule integrityOfTotalAllocPoint(method f) {
 	}
 }
 
-rule monotonicityOfAccSushiPerShare(uint256 pid, method f) {
+rule monotonicityOfAccPichiPerShare(uint256 pid, method f) {
 	env e;
 
-	uint128 _poolInfoAccSushiPerShare = poolInfoAccSushiPerShare(pid);
+	uint128 _poolInfoAccPichiPerShare = poolInfoAccPichiPerShare(pid);
 
 	calldataarg args;
 	f(e, args);
 
-	uint128 poolInfoAccSushiPerShare_ = poolInfoAccSushiPerShare(pid);
+	uint128 poolInfoAccPichiPerShare_ = poolInfoAccPichiPerShare(pid);
 
-	assert compareUint128(poolInfoAccSushiPerShare_, _poolInfoAccSushiPerShare);
+	assert compareUint128(poolInfoAccPichiPerShare_, _poolInfoAccPichiPerShare);
 }
 
 rule monotonicityOfLastRewardBlock(uint256 pid, method f) {
@@ -203,7 +203,7 @@ rule noChangeToOtherUsersRewardDebt(method f, uint256 pid, uint256 amount,
 rule noChangeToOtherPool(uint256 pid, uint256 otherPid) {
 	require pid != otherPid;
 
-	uint128 _otherAccSushiPerShare = poolInfoAccSushiPerShare(otherPid);
+	uint128 _otherAccPichiPerShare = poolInfoAccPichiPerShare(otherPid);
 	uint64 _otherLastRewardBlock = poolInfoLastRewardBlock(otherPid);
 	uint64 _otherAllocPoint = poolInfoAllocPoint(otherPid);
 
@@ -214,11 +214,11 @@ rule noChangeToOtherPool(uint256 pid, uint256 otherPid) {
 
 	callFunctionWithParams(f, pid, msgSender, to);
 
-	uint128 otherAccSushiPerShare_ = poolInfoAccSushiPerShare(otherPid);
+	uint128 otherAccPichiPerShare_ = poolInfoAccPichiPerShare(otherPid);
 	uint64 otherLastRewardBlock_ = poolInfoLastRewardBlock(otherPid);
 	uint64 otherAllocPoint_ = poolInfoAllocPoint(otherPid);
 
-	assert(_otherAccSushiPerShare == otherAccSushiPerShare_, "accSushiPerShare changed");
+	assert(_otherAccPichiPerShare == otherAccPichiPerShare_, "accPichiPerShare changed");
 
 	assert(_otherLastRewardBlock == otherLastRewardBlock_, "lastRewardBlock changed");
 
@@ -233,7 +233,7 @@ rule preserveTotalAssetOfUser(method f, uint256 pid, address user,
 	require lpToken(pid) == tokenA;
 
 	require user == e.msg.sender && user == to && user != currentContract;
-	require SUSHI() != lpToken(pid); // <-- check this again (Nurit)
+	require PICHI() != lpToken(pid); // <-- check this again (Nurit)
 
 	uint256 _totalUserAssets = tokenA.balanceOf(e, user) + userInfoAmount(pid, user);
 
@@ -276,7 +276,7 @@ rule changeToAtmostOneUserAmount(uint256 pid, address u, address v, method f) {
 
 rule solvency(uint256 pid, address u, address lptoken, method f) {
 	require lptoken == lpToken(pid);
-	require lptoken != SUSHI();
+	require lptoken != PICHI();
 
 	uint256 _balance = userLpTokenBalanceOf(pid, currentContract); // TODO - maybe rename this to LpTokenBalanceOf
 	uint256 _userAmount = userInfoAmount(pid, u); 
@@ -295,22 +295,22 @@ rule solvency(uint256 pid, address u, address lptoken, method f) {
 	assert userAmount_ != _userAmount => (userAmount_ - _userAmount == balance_ - _balance);
 }
 
-rule sushiGivenInHarvestEqualsPendingSushi(uint256 pid, address user, address to) {
+rule pichiGivenInHarvestEqualsPendingPichi(uint256 pid, address user, address to) {
 	env e;
 
 	require to == user && user != currentContract && e.msg.sender == user;
-	require sushiToken == SUSHI();
+	require polyCityToken == PICHI();
 
-	uint256 userSushiBalance = sushiToken.balanceOf(e, user);
-	uint256 userPendingSushi = pendingSushi(e, pid, user);
+	uint256 userPichiBalance = polyCityToken.balanceOf(e, user);
+	uint256 userPendingPichi = pendingPichi(e, pid, user);
 
 	// Does success return value matters? Check with Nurit
 	harvest(e, pid, to);
 
-	uint256 userSushiBalance_ = sushiToken.balanceOf(e, user);
+	uint256 userPichiBalance_ = polyCityToken.balanceOf(e, user);
 
-	assert(userSushiBalance_ == (userSushiBalance + userPendingSushi),
-		   "pending sushi not equal to the sushi given in harvest");
+	assert(userPichiBalance_ == (userPichiBalance + userPendingPichi),
+		   "pending pichi not equal to the pichi given in harvest");
 }
 
 rule additivityOfDepositOnAmount(uint256 pid, uint256 x, uint256 y, address to) {
@@ -375,8 +375,8 @@ function callFunctionWithParams(method f, uint256 pid, address sender, address t
 
 	if (f.selector == set(uint256, uint256, address, bool).selector) {
 		set(e, pid, allocPoint, rewarder, overwrite);
-	} else if (f.selector == pendingSushi(uint256, address).selector) {
-		pendingSushi(e, pid, to);
+	} else if (f.selector == pendingPichi(uint256, address).selector) {
+		pendingPichi(e, pid, to);
 	} else if (f.selector == updatePool(uint256).selector) {
 		updatePool(e, pid);
 	} else if (f.selector == deposit(uint256, uint256, address).selector) {

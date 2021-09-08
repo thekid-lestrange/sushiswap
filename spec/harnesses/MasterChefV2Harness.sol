@@ -7,8 +7,8 @@ contract MasterChefV2Harness is MasterChefV2 {
     ////////////////////////////////////////////////////////////////////////////
     //                         Constructors and inits                         //
     ////////////////////////////////////////////////////////////////////////////
-    constructor(IMasterChef _MASTER_CHEF, IERC20 _sushi, uint256 _MASTER_PID)
-                    MasterChefV2(_MASTER_CHEF, _sushi, _MASTER_PID) public { }
+    constructor(IMasterChef _MASTER_CHEF, IERC20 _pichi, uint256 _MASTER_PID)
+                    MasterChefV2(_MASTER_CHEF, _pichi, _MASTER_PID) public { }
 
     ////////////////////////////////////////////////////////////////////////////
     //                        Getters for The Internals                       //
@@ -25,8 +25,8 @@ contract MasterChefV2Harness is MasterChefV2 {
         return lpToken[pid].balanceOf(user);
     }
 
-    function poolInfoAccSushiPerShare(uint256 pid) public view returns (uint128) {
-        return poolInfo[pid].accSushiPerShare;
+    function poolInfoAccPichiPerShare(uint256 pid) public view returns (uint128) {
+        return poolInfo[pid].accPichiPerShare;
     }
 
     function poolInfoLastRewardBlock(uint256 pid) public view returns (uint64) {
@@ -43,9 +43,9 @@ contract MasterChefV2Harness is MasterChefV2 {
     function batch(bytes[] calldata calls, bool revertOnFail) override external
             payable returns(bool[] memory successes, bytes[] memory results) { }
 
-    mapping(uint256 => uint256) symbolicSushiPerBlock; // random number
-    function sushiPerBlock() public view override returns (uint256 amount) {
-        return symbolicSushiPerBlock[block.number];
+    mapping(uint256 => uint256) symbolicPichiPerBlock; // random number
+    function pichiPerBlock() public view override returns (uint256 amount) {
+        return symbolicPichiPerBlock[block.number];
     }
 
     ////////////////////////////////////////////////////////////////////////////

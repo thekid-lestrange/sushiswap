@@ -12,7 +12,7 @@ describe("Migrator", function () {
     this.UniswapV2Factory = await ethers.getContractFactory("UniswapV2Factory")
     this.UniswapV2Pair = await ethers.getContractFactory("UniswapV2Pair")
     this.ERC20Mock = await ethers.getContractFactory("ERC20Mock", this.minter)
-    this.SushiToken = await ethers.getContractFactory("SushiToken")
+    this.PolyCityDexToken = await ethers.getContractFactory("PolyCityDexToken")
     this.MasterChef = await ethers.getContractFactory("MasterChef")
     this.Migrator = await ethers.getContractFactory("Migrator")
   })
@@ -24,8 +24,8 @@ describe("Migrator", function () {
     this.factory2 = await this.UniswapV2Factory.deploy(this.alice.address)
     await this.factory2.deployed()
 
-    this.sushi = await this.SushiToken.deploy()
-    await this.sushi.deployed()
+    this.pichi = await this.PolyCityDexToken.deploy()
+    await this.pichi.deployed()
 
     this.weth = await this.ERC20Mock.deploy("WETH", "WETH", "100000000")
     await this.weth.deployed()
@@ -41,13 +41,13 @@ describe("Migrator", function () {
 
     this.lp2 = await this.UniswapV2Pair.attach((await pair2.wait()).events[0].args.pair)
 
-    this.chef = await this.MasterChef.deploy(this.sushi.address, this.dev.address, "1000", "0", "100000")
+    this.chef = await this.MasterChef.deploy(this.pichi.address, this.dev.address, "1000", "0", "100000")
     await this.chef.deployed()
 
     this.migrator = await this.Migrator.deploy(this.chef.address, this.factory1.address, this.factory2.address, "0")
     await this.migrator.deployed()
 
-    await this.sushi.transferOwnership(this.chef.address)
+    await this.pichi.transferOwnership(this.chef.address)
 
     await this.chef.add("100", this.lp1.address, true)
   })

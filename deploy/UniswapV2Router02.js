@@ -1,4 +1,4 @@
-const { WNATIVE } = require("@sushiswap/sdk");
+const { WNATIVE } = require("@polycity/sdk");
 
 module.exports = async function ({ getNamedAccounts, deployments }) {
   const { deploy } = deployments;

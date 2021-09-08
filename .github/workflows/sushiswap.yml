@@ -1,5 +1,5 @@
 #  workflow pipeline
-name: sushiswap
+name: polycity
 
 on: ["push", "pull_request"]
 

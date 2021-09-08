@@ -3,27 +3,27 @@ import { assert, expect } from "chai"
 
 describe("MasterChefV2", function () {
   before(async function () {
-    await prepare(this, ["MasterChef", "SushiToken", "ERC20Mock", "MasterChefV2", "RewarderMock", "RewarderBrokenMock"])
+    await prepare(this, ["MasterChef", "PolyCityDexToken", "ERC20Mock", "MasterChefV2", "RewarderMock", "RewarderBrokenMock"])
     await deploy(this, [["brokenRewarder", this.RewarderBrokenMock]])
   })
 
   beforeEach(async function () {
-    await deploy(this, [["sushi", this.SushiToken]])
+    await deploy(this, [["pichi", this.PolyCityDexToken]])
 
     await deploy(this, [
       ["lp", this.ERC20Mock, ["LP Token", "LPT", getBigNumber(10)]],
       ["dummy", this.ERC20Mock, ["Dummy", "DummyT", getBigNumber(10)]],
-      ["chef", this.MasterChef, [this.sushi.address, this.bob.address, getBigNumber(100), "0", "0"]],
+      ["chef", this.MasterChef, [this.pichi.address, this.bob.address, getBigNumber(100), "0", "0"]],
     ])
 
-    await this.sushi.transferOwnership(this.chef.address)
+    await this.pichi.transferOwnership(this.chef.address)
     await this.chef.add(100, this.lp.address, true)
     await this.chef.add(100, this.dummy.address, true)
     await this.lp.approve(this.chef.address, getBigNumber(10))
     await this.chef.deposit(0, getBigNumber(10))
 
     await deploy(this, [
-      ["chef2", this.MasterChefV2, [this.chef.address, this.sushi.address, 1]],
+      ["chef2", this.MasterChefV2, [this.chef.address, this.pichi.address, 1]],
       ["rlp", this.ERC20Mock, ["LP", "rLPT", getBigNumber(10)]],
       ["r", this.ERC20Mock, ["Reward", "RewardT", getBigNumber(100000)]],
     ])
@@ -67,19 +67,19 @@ describe("MasterChefV2", function () {
     })
   })
 
-  describe("PendingSushi", function () {
-    it("PendingSushi should equal ExpectedSushi", async function () {
+  describe("PendingPichi", function () {
+    it("PendingPichi should equal ExpectedPichi", async function () {
       await this.chef2.add(10, this.rlp.address, this.rewarder.address)
       await this.rlp.approve(this.chef2.address, getBigNumber(10))
       let log = await this.chef2.deposit(0, getBigNumber(1), this.alice.address)
       await advanceBlock()
       let log2 = await this.chef2.updatePool(0)
       await advanceBlock()
-      let expectedSushi = getBigNumber(100)
+      let expectedPichi = getBigNumber(100)
         .mul(log2.blockNumber + 1 - log.blockNumber)
         .div(2)
-      let pendingSushi = await this.chef2.pendingSushi(0, this.alice.address)
-      expect(pendingSushi).to.be.equal(expectedSushi)
+      let pendingPichi = await this.chef2.pendingPichi(0, this.alice.address)
+      expect(pendingPichi).to.be.equal(expectedPichi)
     })
     it("When block is lastRewardBlock", async function () {
       await this.chef2.add(10, this.rlp.address, this.rewarder.address)
@@ -87,11 +87,11 @@ describe("MasterChefV2", function () {
       let log = await this.chef2.deposit(0, getBigNumber(1), this.alice.address)
       await advanceBlockTo(3)
       let log2 = await this.chef2.updatePool(0)
-      let expectedSushi = getBigNumber(100)
+      let expectedPichi = getBigNumber(100)
         .mul(log2.blockNumber - log.blockNumber)
         .div(2)
-      let pendingSushi = await this.chef2.pendingSushi(0, this.alice.address)
-      expect(pendingSushi).to.be.equal(expectedSushi)
+      let pendingPichi = await this.chef2.pendingPichi(0, this.alice.address)
+      expect(pendingPichi).to.be.equal(expectedPichi)
     })
   })
 
@@ -134,7 +134,7 @@ describe("MasterChefV2", function () {
           0,
           (await this.chef2.poolInfo(0)).lastRewardBlock,
           await this.rlp.balanceOf(this.chef2.address),
-          (await this.chef2.poolInfo(0)).accSushiPerShare
+          (await this.chef2.poolInfo(0)).accPichiPerShare
         )
     })
 
@@ -179,7 +179,7 @@ describe("MasterChefV2", function () {
   })
 
   describe("Harvest", function () {
-    it("Should give back the correct amount of SUSHI and reward", async function () {
+    it("Should give back the correct amount of PICHI and reward", async function () {
       await this.r.transfer(this.rewarder.address, getBigNumber(100000))
       await this.chef2.add(10, this.rlp.address, this.rewarder.address)
       await this.rlp.approve(this.chef2.address, getBigNumber(10))
@@ -188,21 +188,21 @@ describe("MasterChefV2", function () {
       await advanceBlockTo(20)
       await this.chef2.harvestFromMasterChef()
       let log2 = await this.chef2.withdraw(0, getBigNumber(1), this.alice.address)
-      let expectedSushi = getBigNumber(100)
+      let expectedPichi = getBigNumber(100)
         .mul(log2.blockNumber - log.blockNumber)
         .div(2)
-      expect((await this.chef2.userInfo(0, this.alice.address)).rewardDebt).to.be.equal("-" + expectedSushi)
+      expect((await this.chef2.userInfo(0, this.alice.address)).rewardDebt).to.be.equal("-" + expectedPichi)
       await this.chef2.harvest(0, this.alice.address)
-      expect(await this.sushi.balanceOf(this.alice.address))
+      expect(await this.pichi.balanceOf(this.alice.address))
         .to.be.equal(await this.r.balanceOf(this.alice.address))
-        .to.be.equal(expectedSushi)
+        .to.be.equal(expectedPichi)
     })
     it("Harvest with empty user balance", async function () {
       await this.chef2.add(10, this.rlp.address, this.rewarder.address)
       await this.chef2.harvest(0, this.alice.address)
     })
 
-    it("Harvest for SUSHI-only pool", async function () {
+    it("Harvest for PICHI-only pool", async function () {
       await this.chef2.add(10, this.rlp.address, ADDRESS_ZERO)
       await this.rlp.approve(this.chef2.address, getBigNumber(10))
       expect(await this.chef2.lpToken(0)).to.be.equal(this.rlp.address)
@@ -210,12 +210,12 @@ describe("MasterChefV2", function () {
       await advanceBlock()
       await this.chef2.harvestFromMasterChef()
       let log2 = await this.chef2.withdraw(0, getBigNumber(1), this.alice.address)
-      let expectedSushi = getBigNumber(100)
+      let expectedPichi = getBigNumber(100)
         .mul(log2.blockNumber - log.blockNumber)
         .div(2)
-      expect((await this.chef2.userInfo(0, this.alice.address)).rewardDebt).to.be.equal("-" + expectedSushi)
+      expect((await this.chef2.userInfo(0, this.alice.address)).rewardDebt).to.be.equal("-" + expectedPichi)
       await this.chef2.harvest(0, this.alice.address)
-      expect(await this.sushi.balanceOf(this.alice.address)).to.be.equal(expectedSushi)
+      expect(await this.pichi.balanceOf(this.alice.address)).to.be.equal(expectedPichi)
     })
   })
 

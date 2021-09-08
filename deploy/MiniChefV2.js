@@ -1,7 +1,7 @@
-const { ChainId } = require("@sushiswap/sdk")
+const { ChainId } = require("@polycity/sdk")
 
 
-const SUSHI = {
+const PICHI = {
   [ChainId.MATIC]: '0x0b3F868E0BE5597D5DB7fEB59E1CADBb0fdDa50a'
 }
 
@@ -12,19 +12,19 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
 
   const chainId = await getChainId()
 
-  let sushiAddress;
+  let pichiAddress;
 
   if (chainId === '31337') {
-    sushiAddress = (await deployments.get("SushiToken")).address
-  } else if (chainId in SUSHI) {
-    sushiAddress = SUSHI[chainId]
+    pichiAddress = (await deployments.get("PolyCityDexToken")).address
+  } else if (chainId in PICHI) {
+    pichiAddress = PICHI[chainId]
   } else {
-    throw Error("No SUSHI!")
+    throw Error("No PICHI!")
   }
 
   await deploy("MiniChefV2", {
     from: deployer,
-    args: [sushiAddress],
+    args: [pichiAddress],
     log: true,
     deterministicDeployment: false
   })

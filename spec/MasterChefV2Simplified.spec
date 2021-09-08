@@ -8,7 +8,7 @@
 // Declaration of contracts used in the sepc 
 using DummyERC20A as tokenA
 using DummyERC20B as tokenB
-using DummySUSHI as sushiToken
+using DummyPICHI as polyCityToken
 
 /*
  * Declaration of methods that are used in the rules.
@@ -21,7 +21,7 @@ methods {
 	userInfoRewardDebt(uint256 pid, address user) returns (int256) envfree 
 	userLpTokenBalanceOf(uint256 pid, address user) returns (uint256) envfree // NOT USED
 
-	poolInfoAccSushiPerShare(uint256 pid) returns (uint128) envfree
+	poolInfoAccPichiPerShare(uint256 pid) returns (uint128) envfree
 	poolInfoLastRewardBlock(uint256 pid) returns (uint64) envfree
 	poolInfoAllocPoint(uint256 pid) returns (uint64) envfree
 	totalAllocPoint() returns (uint256) envfree
@@ -30,7 +30,7 @@ methods {
 	rewarder(uint256 pid) returns (address) envfree
 
 	// overrided methods
-	sushiPerBlock() returns (uint256 amount)
+	pichiPerBlock() returns (uint256 amount)
 
 	// ERC20 
 	balanceOf(address) => DISPATCHER(true) 
@@ -55,16 +55,16 @@ methods {
 	lpTokenLength() returns (uint256) envfree // NOT USED
 	rewarderLength() returns (uint256) envfree // NOT USED
 
-	// SUSHI token
-	SUSHI() returns (address) envfree // NOT USED
-	sushiToken.balanceOf(address) returns (uint256) // NOT USED
+	// PICHI token
+	PICHI() returns (address) envfree // NOT USED
+	polyCityToken.balanceOf(address) returns (uint256) // NOT USED
 
 	// Dummy ERC20
 	tokenA.balanceOf(address) returns (uint256) // NOT USED
 	tokenB.balanceOf(address) returns (uint256) // NOT USED
 
 	// Rewarder
-	// SIG_ON_SUSHI_REWARD = 0xbb6cc2ef; // onSushiReward(uint256,address,uint256)
+	// SIG_ON_PICHI_REWARD = 0xbb6cc2ef; // onPichiReward(uint256,address,uint256)
 	0xbb6cc2ef => NONDET
 
 	// MasterChefV1

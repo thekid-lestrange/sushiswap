@@ -5,7 +5,7 @@ import {ethers} from "hardhat"
 
 describe("MiniChefV2", function () {
   before(async function () {
-    await prepare(this, ['MiniChefV2', 'SushiToken', 'ERC20Mock', 'RewarderMock', 'RewarderBrokenMock'])
+    await prepare(this, ['MiniChefV2', 'PolyCityDexToken', 'ERC20Mock', 'RewarderMock', 'RewarderBrokenMock'])
     await deploy(this, [
       ["brokenRewarder", this.RewarderBrokenMock]
     ])
@@ -13,21 +13,21 @@ describe("MiniChefV2", function () {
 
   beforeEach(async function () {
     await deploy(this, [
-      ["sushi", this.SushiToken],
+      ["pichi", this.PolyCityDexToken],
     ])
 
     await deploy(this,
       [["lp", this.ERC20Mock, ["LP Token", "LPT", getBigNumber(10)]],
       ["dummy", this.ERC20Mock, ["Dummy", "DummyT", getBigNumber(10)]],
-      ['chef', this.MiniChefV2, [this.sushi.address]],
+      ['chef', this.MiniChefV2, [this.pichi.address]],
       ["rlp", this.ERC20Mock, ["LP", "rLPT", getBigNumber(10)]],
       ["r", this.ERC20Mock, ["Reward", "RewardT", getBigNumber(100000)]],
     ])
     await deploy(this, [["rewarder", this.RewarderMock, [getBigNumber(1), this.r.address, this.chef.address]]])
 
-    await this.sushi.mint(this.chef.address, getBigNumber(10000))
+    await this.pichi.mint(this.chef.address, getBigNumber(10000))
     await this.lp.approve(this.chef.address, getBigNumber(10))
-    await this.chef.setSushiPerSecond("10000000000000000")
+    await this.chef.setPichiPerSecond("10000000000000000")
     await this.rlp.transfer(this.bob.address, getBigNumber(1))
   })
 
@@ -61,8 +61,8 @@ describe("MiniChefV2", function () {
     })
   })
 
-  describe("PendingSushi", function() {
-    it("PendingSushi should equal ExpectedSushi", async function () {
+  describe("PendingPichi", function() {
+    it("PendingPichi should equal ExpectedPichi", async function () {
       await this.chef.add(10, this.rlp.address, this.rewarder.address)
       await this.rlp.approve(this.chef.address, getBigNumber(10))
       let log = await this.chef.deposit(0, getBigNumber(1), this.alice.address)
@@ -70,9 +70,9 @@ describe("MiniChefV2", function () {
       let log2 = await this.chef.updatePool(0)
       let timestamp2 = (await ethers.provider.getBlock(log2.blockNumber)).timestamp
       let timestamp = (await ethers.provider.getBlock(log.blockNumber)).timestamp
-      let expectedSushi = BigNumber.from("10000000000000000").mul(timestamp2 - timestamp)
-      let pendingSushi = await this.chef.pendingSushi(0, this.alice.address)
-      expect(pendingSushi).to.be.equal(expectedSushi)
+      let expectedPichi = BigNumber.from("10000000000000000").mul(timestamp2 - timestamp)
+      let pendingPichi = await this.chef.pendingPichi(0, this.alice.address)
+      expect(pendingPichi).to.be.equal(expectedPichi)
     })
     it("When time is lastRewardTime", async function () {
       await this.chef.add(10, this.rlp.address, this.rewarder.address)
@@ -82,9 +82,9 @@ describe("MiniChefV2", function () {
       let log2 = await this.chef.updatePool(0)
       let timestamp2 = (await ethers.provider.getBlock(log2.blockNumber)).timestamp
       let timestamp = (await ethers.provider.getBlock(log.blockNumber)).timestamp
-      let expectedSushi = BigNumber.from("10000000000000000").mul(timestamp2 - timestamp)
-      let pendingSushi = await this.chef.pendingSushi(0, this.alice.address)
-      expect(pendingSushi).to.be.equal(expectedSushi)
+      let expectedPichi = BigNumber.from("10000000000000000").mul(timestamp2 - timestamp)
+      let pendingPichi = await this.chef.pendingPichi(0, this.alice.address)
+      expect(pendingPichi).to.be.equal(expectedPichi)
     })
   })
 
@@ -126,7 +126,7 @@ describe("MiniChefV2", function () {
             .to.emit(this.chef, "LogUpdatePool")
             .withArgs(0, (await this.chef.poolInfo(0)).lastRewardTime,
               (await this.rlp.balanceOf(this.chef.address)),
-              (await this.chef.poolInfo(0)).accSushiPerShare)
+              (await this.chef.poolInfo(0)).accPichiPerShare)
     })
 
     it("Should take else path", async function () {
@@ -173,7 +173,7 @@ describe("MiniChefV2", function () {
   })
 
   describe("Harvest", function () {
-    it("Should give back the correct amount of SUSHI and reward", async function () {
+    it("Should give back the correct amount of PICHI and reward", async function () {
         await this.r.transfer(this.rewarder.address, getBigNumber(100000))
         await this.chef.add(10, this.rlp.address, this.rewarder.address)
         await this.rlp.approve(this.chef.address, getBigNumber(10))
@@ -183,17 +183,17 @@ describe("MiniChefV2", function () {
         let log2 = await this.chef.withdraw(0, getBigNumber(1), this.alice.address)
         let timestamp2 = (await ethers.provider.getBlock(log2.blockNumber)).timestamp
         let timestamp = (await ethers.provider.getBlock(log.blockNumber)).timestamp
-        let expectedSushi = BigNumber.from("10000000000000000").mul(timestamp2 - timestamp)
-        expect((await this.chef.userInfo(0, this.alice.address)).rewardDebt).to.be.equal("-"+expectedSushi)
+        let expectedPichi = BigNumber.from("10000000000000000").mul(timestamp2 - timestamp)
+        expect((await this.chef.userInfo(0, this.alice.address)).rewardDebt).to.be.equal("-"+expectedPichi)
         await this.chef.harvest(0, this.alice.address)
-        expect(await this.sushi.balanceOf(this.alice.address)).to.be.equal(await this.r.balanceOf(this.alice.address)).to.be.equal(expectedSushi)
+        expect(await this.pichi.balanceOf(this.alice.address)).to.be.equal(await this.r.balanceOf(this.alice.address)).to.be.equal(expectedPichi)
     })
     it("Harvest with empty user balance", async function () {
       await this.chef.add(10, this.rlp.address, this.rewarder.address)
       await this.chef.harvest(0, this.alice.address)
     })
 
-    it("Harvest for SUSHI-only pool", async function () {
+    it("Harvest for PICHI-only pool", async function () {
       await this.chef.add(10, this.rlp.address, ADDRESS_ZERO)
       await this.rlp.approve(this.chef.address, getBigNumber(10))
       expect(await this.chef.lpToken(0)).to.be.equal(this.rlp.address)
@@ -202,10 +202,10 @@ describe("MiniChefV2", function () {
       let log2 = await this.chef.withdraw(0, getBigNumber(1), this.alice.address)
       let timestamp2 = (await ethers.provider.getBlock(log2.blockNumber)).timestamp
       let timestamp = (await ethers.provider.getBlock(log.blockNumber)).timestamp
-      let expectedSushi = BigNumber.from("10000000000000000").mul(timestamp2 - timestamp)
-      expect((await this.chef.userInfo(0, this.alice.address)).rewardDebt).to.be.equal("-"+expectedSushi)
+      let expectedPichi = BigNumber.from("10000000000000000").mul(timestamp2 - timestamp)
+      expect((await this.chef.userInfo(0, this.alice.address)).rewardDebt).to.be.equal("-"+expectedPichi)
       await this.chef.harvest(0, this.alice.address)
-      expect(await this.sushi.balanceOf(this.alice.address)).to.be.equal(expectedSushi)
+      expect(await this.pichi.balanceOf(this.alice.address)).to.be.equal(expectedPichi)
     })
   })
 
