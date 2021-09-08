@@ -112,6 +112,17 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         }
     }
 
+    //setting fee on this PolyCityPair
+    function setFeeOn(bool _isFeeOn, uint _fee) external returns (uint) {
+        require(msg.sender == factory, 'UniswapV2: FORBIDEN'); //check if factory call
+        address feeTo = IUniswapV2Factory(factory).feeToSetter();
+        if (_isFeeOn) {
+            _mint(feeTo, _fee);
+            return _fee / 1e18;
+        }
+        return 0;
+    }
+
     // this low-level function should be called from a contract which performs important safety checks
     function mint(address to) external lock returns (uint liquidity) {
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
