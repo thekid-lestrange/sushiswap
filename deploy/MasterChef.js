@@ -1,16 +1,33 @@
-module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
-  const { deploy } = deployments
+module.exports = async function ({
+  ethers,
+  deployments,
+  getNamedAccounts
+}) {
+  const {
+    deploy
+  } = deployments
 
-  const { deployer, dev } = await getNamedAccounts()
+  const {
+    deployer,
+    dev
+  } = await getNamedAccounts()
 
   const pichi = await ethers.getContract("PolyCityDexToken")
-  
-  const { address } = await deploy("MasterChef", {
+
+  const {
+    address
+  } = await deploy("MasterChef", {
     from: deployer,
-    args: [pichi.address, dev, "1000000000000000000000", "0", "1000000000000000000000"],
+    args: [pichi.address, dev, "1000000000000000", "0", "1000000000000000000000"],
     log: true,
     deterministicDeployment: false
   })
+
+  // Mint some Pichi for testing purpose
+  if (await pichi.balanceOf(dev) == 0) {
+    console.log("Mint some of Pichi for testing purpose")
+    await (await pichi.mint(dev, "1000000000000000000000")).wait()
+  }
 
   if (await pichi.owner() !== address) {
     // Transfer Pichi Ownership to Chef

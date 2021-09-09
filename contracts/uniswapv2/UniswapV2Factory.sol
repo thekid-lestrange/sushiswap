@@ -2,8 +2,8 @@
 
 pragma solidity =0.6.12;
 
-import './interfaces/IUniswapV2Factory.sol';
-import './UniswapV2Pair.sol';
+import "./interfaces/IUniswapV2Factory.sol";
+import "./UniswapV2Pair.sol";
 
 contract UniswapV2Factory is IUniswapV2Factory {
     address public override feeTo;
@@ -19,7 +19,7 @@ contract UniswapV2Factory is IUniswapV2Factory {
         feeToSetter = _feeToSetter;
     }
 
-    function allPairsLength() external override view returns (uint) {
+    function allPairsLength() external view override returns (uint) {
         return allPairs.length;
     }
 
@@ -32,15 +32,15 @@ contract UniswapV2Factory is IUniswapV2Factory {
         uint256 _fee,
         bool _onFee
     ) external returns (uint) {
-        require(msg.sender == feeToSetter, 'UniswapV2: FORBIDEN');
+        require(msg.sender == feeToSetter, "UniswapV2: FORBIDEN");
         return UniswapV2Pair(_pair).setFeeOn(_onFee, _fee);
     }
 
     function createPair(address tokenA, address tokenB) external override returns (address pair) {
-        require(tokenA != tokenB, 'UniswapV2: IDENTICAL_ADDRESSES');
+        require(tokenA != tokenB, "UniswapV2: IDENTICAL_ADDRESSES");
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
-        require(token0 != address(0), 'UniswapV2: ZERO_ADDRESS');
-        require(getPair[token0][token1] == address(0), 'UniswapV2: PAIR_EXISTS'); // single check is sufficient
+        require(token0 != address(0), "UniswapV2: ZERO_ADDRESS");
+        require(getPair[token0][token1] == address(0), "UniswapV2: PAIR_EXISTS"); // single check is sufficient
         bytes memory bytecode = type(UniswapV2Pair).creationCode;
         bytes32 salt = keccak256(abi.encodePacked(token0, token1));
         assembly {
@@ -54,18 +54,17 @@ contract UniswapV2Factory is IUniswapV2Factory {
     }
 
     function setFeeTo(address _feeTo) external override {
-        require(msg.sender == feeToSetter, 'UniswapV2: FORBIDDEN');
+        require(msg.sender == feeToSetter, "UniswapV2: FORBIDDEN");
         feeTo = _feeTo;
     }
 
     function setMigrator(address _migrator) external override {
-        require(msg.sender == feeToSetter, 'UniswapV2: FORBIDDEN');
+        require(msg.sender == feeToSetter, "UniswapV2: FORBIDDEN");
         migrator = _migrator;
     }
 
     function setFeeToSetter(address _feeToSetter) external override {
-        require(msg.sender == feeToSetter, 'UniswapV2: FORBIDDEN');
+        require(msg.sender == feeToSetter, "UniswapV2: FORBIDDEN");
         feeToSetter = _feeToSetter;
     }
-
 }

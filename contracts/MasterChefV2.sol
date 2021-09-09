@@ -16,7 +16,7 @@ interface IMigratorChef {
     function migrate(IERC20 token) external returns (IERC20);
 }
 
-/// @notice The (older) MasterChef contract gives out a constant number of PICHI tokens per block.
+/// @dev The (older) MasterChef contract gives out a constant number of PICHI tokens per block.
 /// It is the only address with minting rights for PICHI.
 /// The idea for this MasterChef V2 (MCV2) contract is therefore to be the owner of a dummy token
 /// that is deposited into the MasterChef V1 (MCV1) contract.
@@ -27,7 +27,7 @@ contract MasterChefV2 is BoringOwnable, BoringBatchable {
     using BoringERC20 for IERC20;
     using SignedSafeMath for int256;
 
-    /// @notice Info of each MCV2 user.
+    /// @dev Info of each MCV2 user.
     /// `amount` LP token amount the user has provided.
     /// `rewardDebt` The amount of PICHI entitled to the user.
     struct UserInfo {
@@ -35,7 +35,7 @@ contract MasterChefV2 is BoringOwnable, BoringBatchable {
         int256 rewardDebt;
     }
 
-    /// @notice Info of each MCV2 pool.
+    /// @dev Info of each MCV2 pool.
     /// `allocPoint` The amount of allocation points assigned to the pool.
     /// Also known as the amount of PICHI to distribute per block.
     struct PoolInfo {
@@ -44,23 +44,23 @@ contract MasterChefV2 is BoringOwnable, BoringBatchable {
         uint64 allocPoint;
     }
 
-    /// @notice Address of MCV1 contract.
+    /// @dev Address of MCV1 contract.
     IMasterChef public immutable MASTER_CHEF;
-    /// @notice Address of PICHI contract.
+    /// @dev Address of PICHI contract.
     IERC20 public immutable PICHI;
-    /// @notice The index of MCV2 master pool in MCV1.
+    /// @dev The index of MCV2 master pool in MCV1.
     uint256 public immutable MASTER_PID;
-    // @notice The migrator contract. It has a lot of power. Can only be set through governance (owner).
+    // @dev The migrator contract. It has a lot of power. Can only be set through governance (owner).
     IMigratorChef public migrator;
 
-    /// @notice Info of each MCV2 pool.
+    /// @dev Info of each MCV2 pool.
     PoolInfo[] public poolInfo;
-    /// @notice Address of the LP token for each MCV2 pool.
+    /// @dev Address of the LP token for each MCV2 pool.
     IERC20[] public lpToken;
-    /// @notice Address of each `IRewarder` contract in MCV2.
+    /// @dev Address of each `IRewarder` contract in MCV2.
     IRewarder[] public rewarder;
 
-    /// @notice Info of each user that stakes LP tokens.
+    /// @dev Info of each user that stakes LP tokens.
     mapping (uint256 => mapping (address => UserInfo)) public userInfo;
     /// @dev Total allocation points. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint;
@@ -86,7 +86,7 @@ contract MasterChefV2 is BoringOwnable, BoringBatchable {
         MASTER_PID = _MASTER_PID;
     }
 
-    /// @notice Deposits a dummy token to `MASTER_CHEF` MCV1. This is required because MCV1 holds the minting rights for PICHI.
+    /// @dev Deposits a dummy token to `MASTER_CHEF` MCV1. This is required because MCV1 holds the minting rights for PICHI.
     /// Any balance of transaction sender in `dummyToken` is transferred.
     /// The allocation point for the pool on MCV1 is the total allocation point for all pools that receive double incentives.
     /// @param dummyToken The address of the ERC-20 token to deposit into MCV1.
@@ -99,12 +99,12 @@ contract MasterChefV2 is BoringOwnable, BoringBatchable {
         emit LogInit();
     }
 
-    /// @notice Returns the number of MCV2 pools.
+    /// @dev Returns the number of MCV2 pools.
     function poolLength() public view returns (uint256 pools) {
         pools = poolInfo.length;
     }
 
-    /// @notice Add a new LP to the pool. Can only be called by the owner.
+    /// @dev Add a new LP to the pool. Can only be called by the owner.
     /// DO NOT add the same LP token more than once. Rewards will be messed up if you do.
     /// @param allocPoint AP of the new pool.
     /// @param _lpToken Address of the LP ERC-20 token.
@@ -123,7 +123,7 @@ contract MasterChefV2 is BoringOwnable, BoringBatchable {
         emit LogPoolAddition(lpToken.length.sub(1), allocPoint, _lpToken, _rewarder);
     }
 
-    /// @notice Update the given pool's PICHI allocation point and `IRewarder` contract. Can only be called by the owner.
+    /// @dev Update the given pool's PICHI allocation point and `IRewarder` contract. Can only be called by the owner.
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _allocPoint New AP of the pool.
     /// @param _rewarder Address of the rewarder delegate.
@@ -135,13 +135,13 @@ contract MasterChefV2 is BoringOwnable, BoringBatchable {
         emit LogSetPool(_pid, _allocPoint, overwrite ? _rewarder : rewarder[_pid], overwrite);
     }
 
-    /// @notice Set the `migrator` contract. Can only be called by the owner.
+    /// @dev Set the `migrator` contract. Can only be called by the owner.
     /// @param _migrator The contract address to set.
     function setMigrator(IMigratorChef _migrator) public onlyOwner {
         migrator = _migrator;
     }
 
-    /// @notice Migrate LP token to another LP contract through the `migrator` contract.
+    /// @dev Migrate LP token to another LP contract through the `migrator` contract.
     /// @param _pid The index of the pool. See `poolInfo`.
     function migrate(uint256 _pid) public {
         require(address(migrator) != address(0), "MasterChefV2: no migrator set");
@@ -153,7 +153,7 @@ contract MasterChefV2 is BoringOwnable, BoringBatchable {
         lpToken[_pid] = newLpToken;
     }
 
-    /// @notice View function to see pending PICHI on frontend.
+    /// @dev View function to see pending PICHI on frontend.
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _user Address of user.
     /// @return pending PICHI reward for a given user.
@@ -170,7 +170,7 @@ contract MasterChefV2 is BoringOwnable, BoringBatchable {
         pending = int256(user.amount.mul(accPichiPerShare) / ACC_PICHI_PRECISION).sub(user.rewardDebt).toUInt256();
     }
 
-    /// @notice Update reward variables for all pools. Be careful of gas spending!
+    /// @dev Update reward variables for all pools. Be careful of gas spending!
     /// @param pids Pool IDs of all to be updated. Make sure to update all active pools.
     function massUpdatePools(uint256[] calldata pids) external {
         uint256 len = pids.length;
@@ -179,13 +179,13 @@ contract MasterChefV2 is BoringOwnable, BoringBatchable {
         }
     }
 
-    /// @notice Calculates and returns the `amount` of PICHI per block.
+    /// @dev Calculates and returns the `amount` of PICHI per block.
     function pichiPerBlock() public view returns (uint256 amount) {
         amount = uint256(MASTERCHEF_PICHI_PER_BLOCK)
             .mul(MASTER_CHEF.poolInfo(MASTER_PID).allocPoint) / MASTER_CHEF.totalAllocPoint();
     }
 
-    /// @notice Update reward variables of the given pool.
+    /// @dev Update reward variables of the given pool.
     /// @param pid The index of the pool. See `poolInfo`.
     /// @return pool Returns the pool that was updated.
     function updatePool(uint256 pid) public returns (PoolInfo memory pool) {
@@ -203,7 +203,7 @@ contract MasterChefV2 is BoringOwnable, BoringBatchable {
         }
     }
 
-    /// @notice Deposit LP tokens to MCV2 for PICHI allocation.
+    /// @dev Deposit LP tokens to MCV2 for PICHI allocation.
     /// @param pid The index of the pool. See `poolInfo`.
     /// @param amount LP token amount to deposit.
     /// @param to The receiver of `amount` deposit benefit.
@@ -226,7 +226,7 @@ contract MasterChefV2 is BoringOwnable, BoringBatchable {
         emit Deposit(msg.sender, pid, amount, to);
     }
 
-    /// @notice Withdraw LP tokens from MCV2.
+    /// @dev Withdraw LP tokens from MCV2.
     /// @param pid The index of the pool. See `poolInfo`.
     /// @param amount LP token amount to withdraw.
     /// @param to Receiver of the LP tokens.
@@ -249,7 +249,7 @@ contract MasterChefV2 is BoringOwnable, BoringBatchable {
         emit Withdraw(msg.sender, pid, amount, to);
     }
 
-    /// @notice Harvest proceeds for transaction sender to `to`.
+    /// @dev Harvest proceeds for transaction sender to `to`.
     /// @param pid The index of the pool. See `poolInfo`.
     /// @param to Receiver of PICHI rewards.
     function harvest(uint256 pid, address to) public {
@@ -274,7 +274,7 @@ contract MasterChefV2 is BoringOwnable, BoringBatchable {
         emit Harvest(msg.sender, pid, _pendingPichi);
     }
     
-    /// @notice Withdraw LP tokens from MCV2 and harvest proceeds for transaction sender to `to`.
+    /// @dev Withdraw LP tokens from MCV2 and harvest proceeds for transaction sender to `to`.
     /// @param pid The index of the pool. See `poolInfo`.
     /// @param amount LP token amount to withdraw.
     /// @param to Receiver of the LP tokens and PICHI rewards.
@@ -302,12 +302,12 @@ contract MasterChefV2 is BoringOwnable, BoringBatchable {
         emit Harvest(msg.sender, pid, _pendingPichi);
     }
 
-    /// @notice Harvests PICHI from `MASTER_CHEF` MCV1 and pool `MASTER_PID` to this MCV2 contract.
+    /// @dev Harvests PICHI from `MASTER_CHEF` MCV1 and pool `MASTER_PID` to this MCV2 contract.
     function harvestFromMasterChef() public {
         MASTER_CHEF.deposit(MASTER_PID, 0);
     }
 
-    /// @notice Withdraw without caring about rewards. EMERGENCY ONLY.
+    /// @dev Withdraw without caring about rewards. EMERGENCY ONLY.
     /// @param pid The index of the pool. See `poolInfo`.
     /// @param to Receiver of the LP tokens.
     function emergencyWithdraw(uint256 pid, address to) public {

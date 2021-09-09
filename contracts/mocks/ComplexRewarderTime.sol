@@ -9,14 +9,14 @@ import "@boringcrypto/boring-solidity/contracts/BoringOwnable.sol";
 import "../MasterChefV2.sol";
 
 /// @author @0xKeno
-contract ComplexRewarderTime is IRewarder,  BoringOwnable{
+contract ComplexRewarderTime is IRewarder, BoringOwnable {
     using BoringMath for uint256;
     using BoringMath128 for uint128;
     using BoringERC20 for IERC20;
 
     IERC20 private immutable rewardToken;
 
-    /// @notice Info of each MCV2 user.
+    /// @dev Info of each MCV2 user.
     /// `amount` LP token amount the user has provided.
     /// `rewardDebt` The amount of PICHI entitled to the user.
     struct UserInfo {
@@ -24,7 +24,7 @@ contract ComplexRewarderTime is IRewarder,  BoringOwnable{
         uint256 rewardDebt;
     }
 
-    /// @notice Info of each MCV2 pool.
+    /// @dev Info of each MCV2 pool.
     /// `allocPoint` The amount of allocation points assigned to the pool.
     /// Also known as the amount of PICHI to distribute per block.
     struct PoolInfo {
@@ -33,13 +33,13 @@ contract ComplexRewarderTime is IRewarder,  BoringOwnable{
         uint64 allocPoint;
     }
 
-    /// @notice Info of each pool.
-    mapping (uint256 => PoolInfo) public poolInfo;
+    /// @dev Info of each pool.
+    mapping(uint256 => PoolInfo) public poolInfo;
 
     uint256[] public poolIds;
 
-    /// @notice Info of each user that stakes LP tokens.
-    mapping (uint256 => mapping (address => UserInfo)) public userInfo;
+    /// @dev Info of each user that stakes LP tokens.
+    mapping(uint256 => mapping(address => UserInfo)) public userInfo;
     /// @dev Total allocation points. Must be the sum of all allocation points in all pools.
     uint256 totalAllocPoint;
 
@@ -55,30 +55,40 @@ contract ComplexRewarderTime is IRewarder,  BoringOwnable{
     event LogRewardPerSecond(uint256 rewardPerSecond);
     event LogInit();
 
-    constructor (IERC20 _rewardToken, uint256 _rewardPerSecond, address _MASTERCHEF_V2) public {
+    constructor(
+        IERC20 _rewardToken,
+        uint256 _rewardPerSecond,
+        address _MASTERCHEF_V2
+    ) public {
         rewardToken = _rewardToken;
         rewardPerSecond = _rewardPerSecond;
         MASTERCHEF_V2 = _MASTERCHEF_V2;
     }
 
-
-    function onPichiReward (uint256 pid, address _user, address to, uint256, uint256 lpToken) onlyMCV2 override external {
+    function onPichiReward(
+        uint256 pid,
+        address _user,
+        address to,
+        uint256,
+        uint256 lpToken
+    ) external override onlyMCV2 {
         PoolInfo memory pool = updatePool(pid);
         UserInfo storage user = userInfo[pid][_user];
         uint256 pending;
         if (user.amount > 0) {
-            pending =
-                (user.amount.mul(pool.accPichiPerShare) / ACC_TOKEN_PRECISION).sub(
-                    user.rewardDebt
-                );
+            pending = (user.amount.mul(pool.accPichiPerShare) / ACC_TOKEN_PRECISION).sub(user.rewardDebt);
             rewardToken.safeTransfer(to, pending);
         }
         user.amount = lpToken;
         user.rewardDebt = lpToken.mul(pool.accPichiPerShare) / ACC_TOKEN_PRECISION;
         emit LogOnReward(_user, pid, pending, to);
     }
-    
-    function pendingTokens(uint256 pid, address user, uint256) override external view returns (IERC20[] memory rewardTokens, uint256[] memory rewardAmounts) {
+
+    function pendingTokens(
+        uint256 pid,
+        address user,
+        uint256
+    ) external view override returns (IERC20[] memory rewardTokens, uint256[] memory rewardAmounts) {
         IERC20[] memory _rewardTokens = new IERC20[](1);
         _rewardTokens[0] = (rewardToken);
         uint256[] memory _rewardAmounts = new uint256[](1);
@@ -86,7 +96,7 @@ contract ComplexRewarderTime is IRewarder,  BoringOwnable{
         return (_rewardTokens, _rewardAmounts);
     }
 
-    /// @notice Sets the pichi per second to be distributed. Can only be called by the owner.
+    /// @dev Sets the pichi per second to be distributed. Can only be called by the owner.
     /// @param _rewardPerSecond The amount of Pichi to be distributed per second.
     function setRewardPerSecond(uint256 _rewardPerSecond) public onlyOwner {
         rewardPerSecond = _rewardPerSecond;
@@ -94,19 +104,16 @@ contract ComplexRewarderTime is IRewarder,  BoringOwnable{
     }
 
     modifier onlyMCV2 {
-        require(
-            msg.sender == MASTERCHEF_V2,
-            "Only MCV2 can call this function."
-        );
+        require(msg.sender == MASTERCHEF_V2, "Only MCV2 can call this function.");
         _;
     }
 
-    /// @notice Returns the number of MCV2 pools.
+    /// @dev Returns the number of MCV2 pools.
     function poolLength() public view returns (uint256 pools) {
         pools = poolIds.length;
     }
 
-    /// @notice Add a new LP to the pool. Can only be called by the owner.
+    /// @dev Add a new LP to the pool. Can only be called by the owner.
     /// DO NOT add the same LP token more than once. Rewards will be messed up if you do.
     /// @param allocPoint AP of the new pool.
     /// @param _pid Pid on MCV2
@@ -115,16 +122,12 @@ contract ComplexRewarderTime is IRewarder,  BoringOwnable{
         uint256 lastRewardTime = block.timestamp;
         totalAllocPoint = totalAllocPoint.add(allocPoint);
 
-        poolInfo[_pid] = PoolInfo({
-            allocPoint: allocPoint.to64(),
-            lastRewardTime: lastRewardTime.to64(),
-            accPichiPerShare: 0
-        });
+        poolInfo[_pid] = PoolInfo({allocPoint: allocPoint.to64(), lastRewardTime: lastRewardTime.to64(), accPichiPerShare: 0});
         poolIds.push(_pid);
         emit LogPoolAddition(_pid, allocPoint);
     }
 
-    /// @notice Update the given pool's PICHI allocation point and `IRewarder` contract. Can only be called by the owner.
+    /// @dev Update the given pool's PICHI allocation point and `IRewarder` contract. Can only be called by the owner.
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _allocPoint New AP of the pool.
     function set(uint256 _pid, uint256 _allocPoint) public onlyOwner {
@@ -133,7 +136,7 @@ contract ComplexRewarderTime is IRewarder,  BoringOwnable{
         emit LogSetPool(_pid, _allocPoint);
     }
 
-    /// @notice View function to see pending Token
+    /// @dev View function to see pending Token
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _user Address of user.
     /// @return pending PICHI reward for a given user.
@@ -150,7 +153,7 @@ contract ComplexRewarderTime is IRewarder,  BoringOwnable{
         pending = (user.amount.mul(accPichiPerShare) / ACC_TOKEN_PRECISION).sub(user.rewardDebt);
     }
 
-    /// @notice Update reward variables for all pools. Be careful of gas spending!
+    /// @dev Update reward variables for all pools. Be careful of gas spending!
     /// @param pids Pool IDs of all to be updated. Make sure to update all active pools.
     function massUpdatePools(uint256[] calldata pids) external {
         uint256 len = pids.length;
@@ -159,7 +162,7 @@ contract ComplexRewarderTime is IRewarder,  BoringOwnable{
         }
     }
 
-    /// @notice Update reward variables of the given pool.
+    /// @dev Update reward variables of the given pool.
     /// @param pid The index of the pool. See `poolInfo`.
     /// @return pool Returns the pool that was updated.
     function updatePool(uint256 pid) public returns (PoolInfo memory pool) {
@@ -177,5 +180,4 @@ contract ComplexRewarderTime is IRewarder,  BoringOwnable{
             emit LogUpdatePool(pid, pool.lastRewardTime, lpSupply, pool.accPichiPerShare);
         }
     }
-
 }

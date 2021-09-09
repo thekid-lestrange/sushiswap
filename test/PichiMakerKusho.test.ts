@@ -5,7 +5,7 @@ import { prepare, deploy, getBigNumber, createSLP } from "./utilities"
 
 describe("KushoPichiMaker", function () {
   before(async function () {
-    await prepare(this, ["PichiMakerKusho", "PolyCityHall", "PichiMakerKushoExploitMock", "ERC20Mock", "UniswapV2Factory", "UniswapV2Pair", "BentoBoxV1", "KushoPairMediumRiskV1", "PeggedOracleV1"])
+    await prepare(this, ["PichiMakerKusho", "PolyCityHall", "PichiMakerKushoExploitMock", "ERC20Mock", "UniswapV2Factory", "UniswapV2Pair", "AntiqueBoxV1", "KushoPairMediumRiskV1", "PeggedOracleV1"])
   })
 
   beforeEach(async function () {
@@ -21,9 +21,9 @@ describe("KushoPichiMaker", function () {
     ])
     // Deploy Pichi and Kusho contracts
     await deploy(this, [["bar", this.PolyCityHall, [this.pichi.address]]])
-    await deploy(this, [["bento", this.BentoBoxV1, [this.weth.address]]])
-    await deploy(this, [["kushoMaster", this.KushoPairMediumRiskV1, [this.bento.address]]])
-    await deploy(this, [["kushoMaker", this.PichiMakerKusho, [this.factory.address, this.bar.address, this.bento.address, this.pichi.address, this.weth.address, this.factory.pairCodeHash()]]])
+    await deploy(this, [["antique", this.AntiqueBoxV1, [this.weth.address]]])
+    await deploy(this, [["kushoMaster", this.KushoPairMediumRiskV1, [this.antique.address]]])
+    await deploy(this, [["kushoMaker", this.PichiMakerKusho, [this.factory.address, this.bar.address, this.antique.address, this.pichi.address, this.weth.address, this.factory.pairCodeHash()]]])
     await deploy(this, [["exploiter", this.PichiMakerKushoExploitMock, [this.kushoMaker.address]]])
     await deploy(this, [["oracle", this.PeggedOracleV1]])
     // Create SLPs
@@ -37,27 +37,27 @@ describe("KushoPichiMaker", function () {
     await createSLP(this, "daiMIC", this.dai, this.mic, getBigNumber(10))
     // Set Kusho fees to Maker
     await this.kushoMaster.setFeeTo(this.kushoMaker.address)
-    // Whitelist Kusho on Bento
-    await this.bento.whitelistMasterContract(this.kushoMaster.address, true)
-    // Approve and make Bento token deposits
-    await this.pichi.approve(this.bento.address, getBigNumber(10))
-    await this.dai.approve(this.bento.address, getBigNumber(10))
-    await this.mic.approve(this.bento.address, getBigNumber(10))
-    await this.usdc.approve(this.bento.address, getBigNumber(10))
-    await this.weth.approve(this.bento.address, getBigNumber(10))
-    await this.strudel.approve(this.bento.address, getBigNumber(10))
-    await this.bento.deposit(this.pichi.address, this.alice.address, this.alice.address, getBigNumber(10), 0)
-    await this.bento.deposit(this.dai.address, this.alice.address, this.alice.address, getBigNumber(10), 0)
-    await this.bento.deposit(this.mic.address, this.alice.address, this.alice.address, getBigNumber(10), 0)
-    await this.bento.deposit(this.usdc.address, this.alice.address, this.alice.address, getBigNumber(10), 0)
-    await this.bento.deposit(this.weth.address, this.alice.address, this.alice.address, getBigNumber(10), 0)
-    await this.bento.deposit(this.strudel.address, this.alice.address, this.alice.address, getBigNumber(10), 0)
-    // Approve Kusho to spend 'alice' Bento tokens
-    await this.bento.setMasterContractApproval(this.alice.address, this.kushoMaster.address, true, "0", "0x0000000000000000000000000000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000000000000000000000000000")
+    // Whitelist Kusho on AntiqueBox
+    await this.antique.whitelistMasterContract(this.kushoMaster.address, true)
+    // Approve and make AntiqueBox token deposits
+    await this.pichi.approve(this.antique.address, getBigNumber(10))
+    await this.dai.approve(this.antique.address, getBigNumber(10))
+    await this.mic.approve(this.antique.address, getBigNumber(10))
+    await this.usdc.approve(this.antique.address, getBigNumber(10))
+    await this.weth.approve(this.antique.address, getBigNumber(10))
+    await this.strudel.approve(this.antique.address, getBigNumber(10))
+    await this.antique.deposit(this.pichi.address, this.alice.address, this.alice.address, getBigNumber(10), 0)
+    await this.antique.deposit(this.dai.address, this.alice.address, this.alice.address, getBigNumber(10), 0)
+    await this.antique.deposit(this.mic.address, this.alice.address, this.alice.address, getBigNumber(10), 0)
+    await this.antique.deposit(this.usdc.address, this.alice.address, this.alice.address, getBigNumber(10), 0)
+    await this.antique.deposit(this.weth.address, this.alice.address, this.alice.address, getBigNumber(10), 0)
+    await this.antique.deposit(this.strudel.address, this.alice.address, this.alice.address, getBigNumber(10), 0)
+    // Approve Kusho to spend 'alice' AntiqueBox tokens
+    await this.antique.setMasterContractApproval(this.alice.address, this.kushoMaster.address, true, "0", "0x0000000000000000000000000000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000000000000000000000000000")
     // **TO-DO - Initialize Kusho Pair**
     //const oracleData = await this.oracle.getDataParameter("1")
     //const initData = defaultAbiCoder.encode(["address", "address", "address", "bytes"], [this.pichi.address, this.dai.address, this.oracle.address, oracleData])
-    //await this.bento.deploy(this.KushoMaster.address, initData, true)
+    //await this.antique.deploy(this.KushoMaster.address, initData, true)
   })
 
   describe("setBridge", function () {

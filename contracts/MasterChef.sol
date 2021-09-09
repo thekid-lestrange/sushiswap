@@ -97,6 +97,11 @@ contract MasterChef is Ownable {
         startBlock = _startBlock;
     }
 
+    function changeBlockReward(uint256 _newBlockReward) public onlyOwner {
+        pichiPerBlock = _newBlockReward;
+        massUpdatePools();
+    }
+
     function poolLength() external view returns (uint256) {
         return poolInfo.length;
     }

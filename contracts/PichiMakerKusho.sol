@@ -9,7 +9,7 @@ import "./uniswapv2/interfaces/IUniswapV2Factory.sol";
 
 import "./Ownable.sol";
 
-interface IBentoBoxWithdraw {
+interface IAntiqueBoxWithdraw {
     function withdraw(
         IERC20 token_,
         address from,
@@ -36,7 +36,7 @@ contract PichiMakerKusho is Ownable {
     //0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac
     address private immutable bar;
     //0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272
-    IBentoBoxWithdraw private immutable bentoBox;
+    IAntiqueBoxWithdraw private immutable antiqueBox;
     //0xF5BCE5077908a1b7370B9ae04AdC565EBd643966 
     address private immutable pichi;
     //0x6B3595068778DD592e39A122f4f5a5cF09C90fE2
@@ -52,21 +52,21 @@ contract PichiMakerKusho is Ownable {
         address indexed server,
         address indexed token0,
         uint256 amount0,
-        uint256 amountBENTO,
+        uint256 amountANTIQUE,
         uint256 amountPICHI
     );
 
     constructor(
         IUniswapV2Factory _factory,
         address _bar,
-        IBentoBoxWithdraw _bentoBox,
+        IAntiqueBoxWithdraw _antiqueBox,
         address _pichi,
         address _weth,
         bytes32 _pairCodeHash
     ) public {
         factory = _factory;
         bar = _bar;
-        bentoBox = _bentoBox;
+        antiqueBox = _antiqueBox;
         pichi = _pichi;
         weth = _weth;
         pairCodeHash = _pairCodeHash;
@@ -103,18 +103,18 @@ contract PichiMakerKusho is Ownable {
         // update Kusho fees for this Maker contract (`feeTo`)
         kushoPair.withdrawFees();
 
-        // convert updated Kusho balance to Bento shares
-        uint256 bentoShares = kushoPair.removeAsset(address(this), kushoPair.balanceOf(address(this)));
+        // convert updated Kusho balance to AntiqueBox shares
+        uint256 antiqueShares = kushoPair.removeAsset(address(this), kushoPair.balanceOf(address(this)));
 
-        // convert Bento shares to underlying Kusho asset (`token0`) balance (`amount0`) for Maker
+        // convert AntiqueBox shares to underlying Kusho asset (`token0`) balance (`amount0`) for Maker
         address token0 = kushoPair.asset();
-        (uint256 amount0, ) = bentoBox.withdraw(IERC20(token0), address(this), address(this), 0, bentoShares);
+        (uint256 amount0, ) = antiqueBox.withdraw(IERC20(token0), address(this), address(this), 0, antiqueShares);
 
         emit LogConvert(
             msg.sender,
             token0,
             amount0,
-            bentoShares,
+            antiqueShares,
             _convertStep(token0, amount0)
         );
     }

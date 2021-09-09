@@ -9,7 +9,7 @@ pragma experimental ABIEncoderV2;
 // File @boringcrypto/boring-solidity/contracts/libraries/BoringMath.sol@v1.2.0
 // License-Identifier: MIT
 
-/// @notice A library for performing overflow-/underflow-safe math,
+/// @dev A library for performing overflow-/underflow-safe math,
 /// updated with awesomeness from of DappHub (https://github.com/dapphub/ds-math).
 library BoringMath {
     function add(uint256 a, uint256 b) internal pure returns (uint256 c) {
@@ -40,7 +40,7 @@ library BoringMath {
     }
 }
 
-/// @notice A library for performing overflow-/underflow-safe addition and subtraction on uint128.
+/// @dev A library for performing overflow-/underflow-safe addition and subtraction on uint128.
 library BoringMath128 {
     function add(uint128 a, uint128 b) internal pure returns (uint128 c) {
         require((c = a + b) >= b, "BoringMath: Add Overflow");
@@ -66,13 +66,13 @@ contract BoringOwnableData {
 contract BoringOwnable is BoringOwnableData {
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    /// @notice `owner` defaults to msg.sender on construction.
+    /// @dev `owner` defaults to msg.sender on construction.
     constructor() public {
         owner = msg.sender;
         emit OwnershipTransferred(address(0), msg.sender);
     }
 
-    /// @notice Transfers ownership to `newOwner`. Either directly or claimable by the new pending owner.
+    /// @dev Transfers ownership to `newOwner`. Either directly or claimable by the new pending owner.
     /// Can only be invoked by the current `owner`.
     /// @param newOwner Address of the new owner.
     /// @param direct True if `newOwner` should be set immediately. False if `newOwner` needs to use `claimOwnership`.
@@ -96,7 +96,7 @@ contract BoringOwnable is BoringOwnableData {
         }
     }
 
-    /// @notice Needs to be called by `pendingOwner` to claim ownership.
+    /// @dev Needs to be called by `pendingOwner` to claim ownership.
     function claimOwnership() public {
         address _pendingOwner = pendingOwner;
 
@@ -109,7 +109,7 @@ contract BoringOwnable is BoringOwnableData {
         pendingOwner = address(0);
     }
 
-    /// @notice Only allows the `owner` to execute the function.
+    /// @dev Only allows the `owner` to execute the function.
     modifier onlyOwner() {
         require(msg.sender == owner, "Ownable: caller is not the owner");
         _;
@@ -169,11 +169,11 @@ contract Domain {
 
 // Data part taken out for building of contracts that receive delegate calls
 contract ERC20Data {
-    /// @notice owner > balance mapping.
+    /// @dev owner > balance mapping.
     mapping(address => uint256) public balanceOf;
-    /// @notice owner > spender > allowance mapping.
+    /// @dev owner > spender > allowance mapping.
     mapping(address => mapping(address => uint256)) public allowance;
-    /// @notice owner > nonce mapping. Used in `permit`.
+    /// @dev owner > nonce mapping. Used in `permit`.
     mapping(address => uint256) public nonces;
 }
 
@@ -181,7 +181,7 @@ contract ERC20 is ERC20Data, Domain {
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 
-    /// @notice Transfers `amount` tokens from `msg.sender` to `to`.
+    /// @dev Transfers `amount` tokens from `msg.sender` to `to`.
     /// @param to The address to move the tokens.
     /// @param amount of the tokens to move.
     /// @return (bool) Returns True if succeeded.
@@ -201,7 +201,7 @@ contract ERC20 is ERC20Data, Domain {
         return true;
     }
 
-    /// @notice Transfers `amount` tokens from `from` to `to`. Caller needs approval for `from`.
+    /// @dev Transfers `amount` tokens from `from` to `to`. Caller needs approval for `from`.
     /// @param from Address to draw tokens from.
     /// @param to The address to move the tokens.
     /// @param amount The token amount to move.
@@ -233,7 +233,7 @@ contract ERC20 is ERC20Data, Domain {
         return true;
     }
 
-    /// @notice Approves `amount` from sender to be spend by `spender`.
+    /// @dev Approves `amount` from sender to be spend by `spender`.
     /// @param spender Address of the party that can draw from msg.sender's account.
     /// @param amount The maximum collective amount that `spender` can draw.
     /// @return (bool) Returns True if approved.
@@ -246,7 +246,7 @@ contract ERC20 is ERC20Data, Domain {
     // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
     bytes32 private constant PERMIT_SIGNATURE_HASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
 
-    /// @notice Approves `value` from `owner_` to be spend by `spender`.
+    /// @dev Approves `value` from `owner_` to be spend by `spender`.
     /// @param owner_ Address of the owner.
     /// @param spender The address of the spender that gets approved to draw from `owner_`.
     /// @param value The maximum collective amount that `spender` can draw.
@@ -276,7 +276,7 @@ contract ERC20 is ERC20Data, Domain {
 // License-Identifier: MIT
 
 interface IMasterContract {
-    /// @notice Init function that gets called from `BoringFactory.deploy`.
+    /// @dev Init function that gets called from `BoringFactory.deploy`.
     /// Also kown as the constructor for cloned contracts.
     /// Any ETH send to `BoringFactory.deploy` ends up here.
     /// @param data Can be abi encoded arguments or anything else.
@@ -291,12 +291,12 @@ struct Rebase {
     uint128 base;
 }
 
-/// @notice A rebasing library using overflow-/underflow-safe math.
+/// @dev A rebasing library using overflow-/underflow-safe math.
 library RebaseLibrary {
     using BoringMath for uint256;
     using BoringMath128 for uint128;
 
-    /// @notice Calculates the base value in relationship to `elastic` and `total`.
+    /// @dev Calculates the base value in relationship to `elastic` and `total`.
     function toBase(
         Rebase memory total,
         uint256 elastic,
@@ -312,7 +312,7 @@ library RebaseLibrary {
         }
     }
 
-    /// @notice Calculates the elastic value in relationship to `base` and `total`.
+    /// @dev Calculates the elastic value in relationship to `base` and `total`.
     function toElastic(
         Rebase memory total,
         uint256 base,
@@ -328,7 +328,7 @@ library RebaseLibrary {
         }
     }
 
-    /// @notice Add `elastic` to `total` and doubles `total.base`.
+    /// @dev Add `elastic` to `total` and doubles `total.base`.
     /// @return (Rebase) The new total.
     /// @return base in relationship to `elastic`.
     function add(
@@ -342,7 +342,7 @@ library RebaseLibrary {
         return (total, base);
     }
 
-    /// @notice Sub `base` from `total` and update `total.elastic`.
+    /// @dev Sub `base` from `total` and update `total.elastic`.
     /// @return (Rebase) The new total.
     /// @return elastic in relationship to `base`.
     function sub(
@@ -356,7 +356,7 @@ library RebaseLibrary {
         return (total, elastic);
     }
 
-    /// @notice Add `elastic` and `base` to `total`.
+    /// @dev Add `elastic` and `base` to `total`.
     function add(
         Rebase memory total,
         uint256 elastic,
@@ -367,7 +367,7 @@ library RebaseLibrary {
         return total;
     }
 
-    /// @notice Subtract `elastic` and `base` to `total`.
+    /// @dev Subtract `elastic` and `base` to `total`.
     function sub(
         Rebase memory total,
         uint256 elastic,
@@ -394,7 +394,7 @@ interface IERC20 {
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 
-    /// @notice EIP 2612
+    /// @dev EIP 2612
     function permit(
         address owner,
         address spender,
@@ -434,7 +434,7 @@ library BoringERC20 {
         }
     }
 
-    /// @notice Provides a safe ERC20.symbol version which returns '???' as fallback string.
+    /// @dev Provides a safe ERC20.symbol version which returns '???' as fallback string.
     /// @param token The address of the ERC-20 token contract.
     /// @return (string) Token symbol.
     function safeSymbol(IERC20 token) internal view returns (string memory) {
@@ -442,7 +442,7 @@ library BoringERC20 {
         return success ? returnDataToString(data) : "???";
     }
 
-    /// @notice Provides a safe ERC20.name version which returns '???' as fallback string.
+    /// @dev Provides a safe ERC20.name version which returns '???' as fallback string.
     /// @param token The address of the ERC-20 token contract.
     /// @return (string) Token name.
     function safeName(IERC20 token) internal view returns (string memory) {
@@ -450,7 +450,7 @@ library BoringERC20 {
         return success ? returnDataToString(data) : "???";
     }
 
-    /// @notice Provides a safe ERC20.decimals version which returns '18' as fallback value.
+    /// @dev Provides a safe ERC20.decimals version which returns '18' as fallback value.
     /// @param token The address of the ERC-20 token contract.
     /// @return (uint8) Token decimals.
     function safeDecimals(IERC20 token) internal view returns (uint8) {
@@ -459,7 +459,7 @@ library BoringERC20 {
     }
 }
 
-// File @polycity/bentobox-sdk/contracts/IBatchFlashBorrower.sol@v1.0.1
+// File @polycity/antiquebox-sdk/contracts/IBatchFlashBorrower.sol@v1.0.1
 // License-Identifier: MIT
 
 interface IBatchFlashBorrower {
@@ -472,7 +472,7 @@ interface IBatchFlashBorrower {
     ) external;
 }
 
-// File @polycity/bentobox-sdk/contracts/IFlashBorrower.sol@v1.0.1
+// File @polycity/antiquebox-sdk/contracts/IFlashBorrower.sol@v1.0.1
 // License-Identifier: MIT
 
 interface IFlashBorrower {
@@ -485,7 +485,7 @@ interface IFlashBorrower {
     ) external;
 }
 
-// File @polycity/bentobox-sdk/contracts/IStrategy.sol@v1.0.1
+// File @polycity/antiquebox-sdk/contracts/IStrategy.sol@v1.0.1
 // License-Identifier: MIT
 
 interface IStrategy {
@@ -503,10 +503,10 @@ interface IStrategy {
     function exit(uint256 balance) external returns (int256 amountAdded);
 }
 
-// File @polycity/bentobox-sdk/contracts/IBentoBoxV1.sol@v1.0.1
+// File @polycity/antiquebox-sdk/contracts/IAntiqueBoxV1.sol@v1.0.1
 // License-Identifier: MIT
 
-interface IBentoBoxV1 {
+interface IAntiqueBoxV1 {
     event LogDeploy(address indexed masterContract, bytes data, address indexed cloneAddress);
     event LogDeposit(address indexed token, address indexed from, address indexed to, uint256 amount, uint256 share);
     event LogFlashLoan(address indexed borrower, address indexed token, uint256 amount, uint256 feeAmount, address indexed receiver);
@@ -666,7 +666,7 @@ interface IBentoBoxV1 {
 // License-Identifier: MIT
 
 interface IOracle {
-    /// @notice Get the latest exchange rate.
+    /// @dev Get the latest exchange rate.
     /// @param data Usually abi encoded, implementation specific data that contains information and arguments to & about the oracle.
     /// For example:
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
@@ -674,7 +674,7 @@ interface IOracle {
     /// @return rate The rate of the requested asset / pair / pool.
     function get(bytes calldata data) external returns (bool success, uint256 rate);
 
-    /// @notice Check the last exchange rate without any state changes.
+    /// @dev Check the last exchange rate without any state changes.
     /// @param data Usually abi encoded, implementation specific data that contains information and arguments to & about the oracle.
     /// For example:
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
@@ -682,21 +682,21 @@ interface IOracle {
     /// @return rate The rate of the requested asset / pair / pool.
     function peek(bytes calldata data) external view returns (bool success, uint256 rate);
 
-    /// @notice Check the current spot exchange rate without any state changes. For oracles like TWAP this will be different from peek().
+    /// @dev Check the current spot exchange rate without any state changes. For oracles like TWAP this will be different from peek().
     /// @param data Usually abi encoded, implementation specific data that contains information and arguments to & about the oracle.
     /// For example:
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return rate The rate of the requested asset / pair / pool.
     function peekSpot(bytes calldata data) external view returns (uint256 rate);
 
-    /// @notice Returns a human readable (short) name about this oracle.
+    /// @dev Returns a human readable (short) name about this oracle.
     /// @param data Usually abi encoded, implementation specific data that contains information and arguments to & about the oracle.
     /// For example:
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
     /// @return (string) A human readable symbol name about this oracle.
     function symbol(bytes calldata data) external view returns (string memory);
 
-    /// @notice Returns a human readable name about this oracle.
+    /// @dev Returns a human readable name about this oracle.
     /// @param data Usually abi encoded, implementation specific data that contains information and arguments to & about the oracle.
     /// For example:
     /// (string memory collateralSymbol, string memory assetSymbol, uint256 division) = abi.decode(data, (string, string, uint256));
@@ -708,11 +708,11 @@ interface IOracle {
 // License-Identifier: MIT
 
 interface ISwapper {
-    /// @notice Withdraws 'amountFrom' of token 'from' from the BentoBox account for this swapper.
+    /// @dev Withdraws 'amountFrom' of token 'from' from the AntiqueBox account for this swapper.
     /// Swaps it for at least 'amountToMin' of token 'to'.
-    /// Transfers the swapped tokens of 'to' into the BentoBox using a plain ERC20 transfer.
-    /// Returns the amount of tokens 'to' transferred to BentoBox.
-    /// (The BentoBox skim function will be used by the caller to get the swapped funds).
+    /// Transfers the swapped tokens of 'to' into the AntiqueBox using a plain ERC20 transfer.
+    /// Returns the amount of tokens 'to' transferred to AntiqueBox.
+    /// (The AntiqueBox skim function will be used by the caller to get the swapped funds).
     function swap(
         IERC20 fromToken,
         IERC20 toToken,
@@ -721,14 +721,14 @@ interface ISwapper {
         uint256 shareFrom
     ) external returns (uint256 extraShare, uint256 shareReturned);
 
-    /// @notice Calculates the amount of token 'from' needed to complete the swap (amountFrom),
+    /// @dev Calculates the amount of token 'from' needed to complete the swap (amountFrom),
     /// this should be less than or equal to amountFromMax.
-    /// Withdraws 'amountFrom' of token 'from' from the BentoBox account for this swapper.
+    /// Withdraws 'amountFrom' of token 'from' from the AntiqueBox account for this swapper.
     /// Swaps it for exactly 'exactAmountTo' of token 'to'.
-    /// Transfers the swapped tokens of 'to' into the BentoBox using a plain ERC20 transfer.
-    /// Transfers allocated, but unused 'from' tokens within the BentoBox to 'refundTo' (amountFromMax - amountFrom).
-    /// Returns the amount of 'from' tokens withdrawn from BentoBox (amountFrom).
-    /// (The BentoBox skim function will be used by the caller to get the swapped funds).
+    /// Transfers the swapped tokens of 'to' into the AntiqueBox using a plain ERC20 transfer.
+    /// Transfers allocated, but unused 'from' tokens within the AntiqueBox to 'refundTo' (amountFromMax - amountFrom).
+    /// Returns the amount of 'from' tokens withdrawn from AntiqueBox (amountFrom).
+    /// (The AntiqueBox skim function will be used by the caller to get the swapped funds).
     function swapExact(
         IERC20 fromToken,
         IERC20 toToken,
@@ -744,7 +744,7 @@ interface ISwapper {
 // Kusho Lending Medium Risk
 
 /// @title KushoPair
-/// @dev This contract allows contract calls to any contract (except BentoBox)
+/// @dev This contract allows contract calls to any contract (except AntiqueBox)
 /// from arbitrary callers thus, don't trust calls from this contract in any circumstances.
 contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
     using BoringMath for uint256;
@@ -764,7 +764,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
     event LogWithdrawFees(address indexed feeTo, uint256 feesEarnedFraction);
 
     // Immutables (for MasterContract and all clones)
-    IBentoBoxV1 public immutable bentoBox;
+    IAntiqueBoxV1 public immutable antiqueBox;
     KushoPairMediumRiskV1 public immutable masterContract;
 
     // MasterContract variables
@@ -780,7 +780,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
 
     // Total amounts
     uint256 public totalCollateralShare; // Total collateral supplied
-    Rebase public totalAsset; // elastic = BentoBox shares held by the KushoPair, base = Total fractions held by asset suppliers
+    Rebase public totalAsset; // elastic = AntiqueBox shares held by the KushoPair, base = Total fractions held by asset suppliers
     Rebase public totalBorrow; // elastic = Total token amount to be repayed by borrowers, base = Total parts of the debt held by borrowers
 
     // User balances
@@ -788,7 +788,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
     // userAssetFraction is called balanceOf for ERC20 compatibility (it's in ERC20.sol)
     mapping(address => uint256) public userBorrowPart;
 
-    /// @notice Exchange and interest rate tracking.
+    /// @dev Exchange and interest rate tracking.
     /// This is 'cached' here because calls to Oracles can be very expensive.
     uint256 public exchangeRate;
 
@@ -845,14 +845,14 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
     uint256 private constant BORROW_OPENING_FEE = 50; // 0.05%
     uint256 private constant BORROW_OPENING_FEE_PRECISION = 1e5;
 
-    /// @notice The constructor is only used for the initial master contract. Subsequent clones are initialised via `init`.
-    constructor(IBentoBoxV1 bentoBox_) public {
-        bentoBox = bentoBox_;
+    /// @dev The constructor is only used for the initial master contract. Subsequent clones are initialised via `init`.
+    constructor(IAntiqueBoxV1 antiqueBox_) public {
+        antiqueBox = antiqueBox_;
         masterContract = this;
         feeTo = msg.sender;
     }
 
-    /// @notice Serves as the constructor for clones, as clones can't have a regular constructor
+    /// @dev Serves as the constructor for clones, as clones can't have a regular constructor
     /// @dev `data` is abi encoded in the format: (IERC20 collateral, IERC20 asset, IOracle oracle, bytes oracleData)
     function init(bytes calldata data) public payable override {
         require(address(collateral) == address(0), "KushoPair: already initialized");
@@ -862,7 +862,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         accrueInfo.interestPerSecond = uint64(STARTING_INTEREST_PER_SECOND); // 1% APR, with 1e18 being 100%
     }
 
-    /// @notice Accrues the interest on the borrowed tokens and handles the accumulation of fees.
+    /// @dev Accrues the interest on the borrowed tokens and handles the accumulation of fees.
     function accrue() public {
         AccrueInfo memory _accrueInfo = accrueInfo;
         // Number of seconds since accrue was called
@@ -890,7 +890,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         // Accrue interest
         extraAmount = uint256(_totalBorrow.elastic).mul(_accrueInfo.interestPerSecond).mul(elapsedTime) / 1e18;
         _totalBorrow.elastic = _totalBorrow.elastic.add(extraAmount.to128());
-        uint256 fullAssetAmount = bentoBox.toAmount(asset, _totalAsset.elastic, false).add(_totalBorrow.elastic);
+        uint256 fullAssetAmount = antiqueBox.toAmount(asset, _totalAsset.elastic, false).add(_totalBorrow.elastic);
 
         uint256 feeAmount = extraAmount.mul(PROTOCOL_FEE) / PROTOCOL_FEE_DIVISOR; // % of interest paid goes to fee
         feeFraction = feeAmount.mul(_totalAsset.base) / fullAssetAmount;
@@ -922,7 +922,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         accrueInfo = _accrueInfo;
     }
 
-    /// @notice Concrete implementation of `isSolvent`. Includes a third parameter to allow caching `exchangeRate`.
+    /// @dev Concrete implementation of `isSolvent`. Includes a third parameter to allow caching `exchangeRate`.
     /// @param _exchangeRate The exchange rate. Used to cache the `exchangeRate` between calls.
     function _isSolvent(
         address user,
@@ -938,7 +938,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         Rebase memory _totalBorrow = totalBorrow;
 
         return
-            bentoBox.toAmount(
+            antiqueBox.toAmount(
                 collateral,
                 collateralShare.mul(EXCHANGE_RATE_PRECISION / COLLATERIZATION_RATE_PRECISION).mul(
                     open ? OPEN_COLLATERIZATION_RATE : CLOSED_COLLATERIZATION_RATE
@@ -955,7 +955,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         require(_isSolvent(msg.sender, false, exchangeRate), "KushoPair: user insolvent");
     }
 
-    /// @notice Gets the exchange rate. I.e how much collateral to buy 1e18 asset.
+    /// @dev Gets the exchange rate. I.e how much collateral to buy 1e18 asset.
     /// This function is supposed to be invoked if needed because Oracle queries can be expensive.
     /// @return updated True if `exchangeRate` was updated.
     /// @return rate The new exchange rate.
@@ -977,7 +977,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
     /// @param total Grand total amount to deduct from this contract's balance. Only applicable if `skim` is True.
     /// Only used for accounting checks.
     /// @param skim If True, only does a balance check on this contract.
-    /// False if tokens from msg.sender in `bentoBox` should be transferred.
+    /// False if tokens from msg.sender in `antiqueBox` should be transferred.
     function _addTokens(
         IERC20 token,
         uint256 share,
@@ -985,16 +985,16 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         bool skim
     ) internal {
         if (skim) {
-            require(share <= bentoBox.balanceOf(token, address(this)).sub(total), "KushoPair: Skim too much");
+            require(share <= antiqueBox.balanceOf(token, address(this)).sub(total), "KushoPair: Skim too much");
         } else {
-            bentoBox.transfer(token, msg.sender, address(this), share);
+            antiqueBox.transfer(token, msg.sender, address(this), share);
         }
     }
 
-    /// @notice Adds `collateral` from msg.sender to the account `to`.
+    /// @dev Adds `collateral` from msg.sender to the account `to`.
     /// @param to The receiver of the tokens.
     /// @param skim True if the amount should be skimmed from the deposit balance of msg.sender.
-    /// False if tokens from msg.sender in `bentoBox` should be transferred.
+    /// False if tokens from msg.sender in `antiqueBox` should be transferred.
     /// @param share The amount of shares to add for `to`.
     function addCollateral(
         address to,
@@ -1005,7 +1005,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         uint256 oldTotalCollateralShare = totalCollateralShare;
         totalCollateralShare = oldTotalCollateralShare.add(share);
         _addTokens(collateral, share, oldTotalCollateralShare, skim);
-        emit LogAddCollateral(skim ? address(bentoBox) : msg.sender, to, share);
+        emit LogAddCollateral(skim ? address(antiqueBox) : msg.sender, to, share);
     }
 
     /// @dev Concrete implementation of `removeCollateral`.
@@ -1013,10 +1013,10 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         userCollateralShare[msg.sender] = userCollateralShare[msg.sender].sub(share);
         totalCollateralShare = totalCollateralShare.sub(share);
         emit LogRemoveCollateral(msg.sender, to, share);
-        bentoBox.transfer(collateral, address(this), to, share);
+        antiqueBox.transfer(collateral, address(this), to, share);
     }
 
-    /// @notice Removes `share` amount of collateral and transfers it to `to`.
+    /// @dev Removes `share` amount of collateral and transfers it to `to`.
     /// @param to The receiver of the shares.
     /// @param share Amount of shares to remove.
     function removeCollateral(address to, uint256 share) public solvent {
@@ -1033,7 +1033,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
     ) internal returns (uint256 fraction) {
         Rebase memory _totalAsset = totalAsset;
         uint256 totalAssetShare = _totalAsset.elastic;
-        uint256 allShare = _totalAsset.elastic + bentoBox.toShare(asset, totalBorrow.elastic, true);
+        uint256 allShare = _totalAsset.elastic + antiqueBox.toShare(asset, totalBorrow.elastic, true);
         fraction = allShare == 0 ? share : share.mul(_totalAsset.base) / allShare;
         if (_totalAsset.base.add(fraction.to128()) < 1000) {
             return 0;
@@ -1041,13 +1041,13 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         totalAsset = _totalAsset.add(share, fraction);
         balanceOf[to] = balanceOf[to].add(fraction);
         _addTokens(asset, share, totalAssetShare, skim);
-        emit LogAddAsset(skim ? address(bentoBox) : msg.sender, to, share, fraction);
+        emit LogAddAsset(skim ? address(antiqueBox) : msg.sender, to, share, fraction);
     }
 
-    /// @notice Adds assets to the lending pair.
+    /// @dev Adds assets to the lending pair.
     /// @param to The address of the user to receive the assets.
     /// @param skim True if the amount should be skimmed from the deposit balance of msg.sender.
-    /// False if tokens from msg.sender in `bentoBox` should be transferred.
+    /// False if tokens from msg.sender in `antiqueBox` should be transferred.
     /// @param share The amount of shares to add.
     /// @return fraction Total fractions added.
     function addAsset(
@@ -1062,7 +1062,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
     /// @dev Concrete implementation of `removeAsset`.
     function _removeAsset(address to, uint256 fraction) internal returns (uint256 share) {
         Rebase memory _totalAsset = totalAsset;
-        uint256 allShare = _totalAsset.elastic + bentoBox.toShare(asset, totalBorrow.elastic, true);
+        uint256 allShare = _totalAsset.elastic + antiqueBox.toShare(asset, totalBorrow.elastic, true);
         share = fraction.mul(allShare) / _totalAsset.base;
         balanceOf[msg.sender] = balanceOf[msg.sender].sub(fraction);
         _totalAsset.elastic = _totalAsset.elastic.sub(share.to128());
@@ -1070,10 +1070,10 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         require(_totalAsset.base >= 1000, "Kusho: below minimum");
         totalAsset = _totalAsset;
         emit LogRemoveAsset(msg.sender, to, share, fraction);
-        bentoBox.transfer(asset, address(this), to, share);
+        antiqueBox.transfer(asset, address(this), to, share);
     }
 
-    /// @notice Removes an asset from msg.sender and transfers it to `to`.
+    /// @dev Removes an asset from msg.sender and transfers it to `to`.
     /// @param to The user that receives the removed assets.
     /// @param fraction The amount/fraction of assets held to remove.
     /// @return share The amount of shares transferred to `to`.
@@ -1090,15 +1090,15 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         userBorrowPart[msg.sender] = userBorrowPart[msg.sender].add(part);
         emit LogBorrow(msg.sender, to, amount, feeAmount, part);
 
-        share = bentoBox.toShare(asset, amount, false);
+        share = antiqueBox.toShare(asset, amount, false);
         Rebase memory _totalAsset = totalAsset;
         require(_totalAsset.base >= 1000, "Kusho: below minimum");
         _totalAsset.elastic = _totalAsset.elastic.sub(share.to128());
         totalAsset = _totalAsset;
-        bentoBox.transfer(asset, address(this), to, share);
+        antiqueBox.transfer(asset, address(this), to, share);
     }
 
-    /// @notice Sender borrows `amount` and transfers it to `to`.
+    /// @dev Sender borrows `amount` and transfers it to `to`.
     /// @return part Total part of the debt held by borrowers.
     /// @return share Total amount in shares borrowed.
     function borrow(address to, uint256 amount) public solvent returns (uint256 part, uint256 share) {
@@ -1115,17 +1115,17 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         (totalBorrow, amount) = totalBorrow.sub(part, true);
         userBorrowPart[to] = userBorrowPart[to].sub(part);
 
-        uint256 share = bentoBox.toShare(asset, amount, true);
+        uint256 share = antiqueBox.toShare(asset, amount, true);
         uint128 totalShare = totalAsset.elastic;
         _addTokens(asset, share, uint256(totalShare), skim);
         totalAsset.elastic = totalShare.add(share.to128());
-        emit LogRepay(skim ? address(bentoBox) : msg.sender, to, amount, part);
+        emit LogRepay(skim ? address(antiqueBox) : msg.sender, to, amount, part);
     }
 
-    /// @notice Repays a loan.
+    /// @dev Repays a loan.
     /// @param to Address of the user this payment should go.
     /// @param skim True if the amount should be skimmed from the deposit balance of msg.sender.
-    /// False if tokens from msg.sender in `bentoBox` should be transferred.
+    /// False if tokens from msg.sender in `antiqueBox` should be transferred.
     /// @param part The amount to repay. See `userBorrowPart`.
     /// @return amount The total amount repayed.
     function repay(
@@ -1151,14 +1151,14 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
     uint8 internal constant ACTION_ADD_COLLATERAL = 10;
     uint8 internal constant ACTION_UPDATE_EXCHANGE_RATE = 11;
 
-    // Function on BentoBox
-    uint8 internal constant ACTION_BENTO_DEPOSIT = 20;
-    uint8 internal constant ACTION_BENTO_WITHDRAW = 21;
-    uint8 internal constant ACTION_BENTO_TRANSFER = 22;
-    uint8 internal constant ACTION_BENTO_TRANSFER_MULTIPLE = 23;
-    uint8 internal constant ACTION_BENTO_SETAPPROVAL = 24;
+    // Function on AntiqueBox
+    uint8 internal constant ACTION_ANTIQUE_DEPOSIT = 20;
+    uint8 internal constant ACTION_ANTIQUE_WITHDRAW = 21;
+    uint8 internal constant ACTION_ANTIQUE_TRANSFER = 22;
+    uint8 internal constant ACTION_ANTIQUE_TRANSFER_MULTIPLE = 23;
+    uint8 internal constant ACTION_ANTIQUE_SETAPPROVAL = 24;
 
-    // Any external call (except to BentoBox)
+    // Any external call (except to AntiqueBox)
     uint8 internal constant ACTION_CALL = 30;
 
     int256 internal constant USE_VALUE1 = -1;
@@ -1173,8 +1173,8 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         outNum = inNum >= 0 ? uint256(inNum) : (inNum == USE_VALUE1 ? value1 : value2);
     }
 
-    /// @dev Helper function for depositing into `bentoBox`.
-    function _bentoDeposit(
+    /// @dev Helper function for depositing into `antiqueBox`.
+    function _antiqueDeposit(
         bytes memory data,
         uint256 value,
         uint256 value1,
@@ -1183,21 +1183,21 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         (IERC20 token, address to, int256 amount, int256 share) = abi.decode(data, (IERC20, address, int256, int256));
         amount = int256(_num(amount, value1, value2)); // Done this way to avoid stack too deep errors
         share = int256(_num(share, value1, value2));
-        return bentoBox.deposit{value: value}(token, msg.sender, to, uint256(amount), uint256(share));
+        return antiqueBox.deposit{value: value}(token, msg.sender, to, uint256(amount), uint256(share));
     }
 
-    /// @dev Helper function to withdraw from the `bentoBox`.
-    function _bentoWithdraw(
+    /// @dev Helper function to withdraw from the `antiqueBox`.
+    function _antiqueWithdraw(
         bytes memory data,
         uint256 value1,
         uint256 value2
     ) internal returns (uint256, uint256) {
         (IERC20 token, address to, int256 amount, int256 share) = abi.decode(data, (IERC20, address, int256, int256));
-        return bentoBox.withdraw(token, msg.sender, to, _num(amount, value1, value2), _num(share, value1, value2));
+        return antiqueBox.withdraw(token, msg.sender, to, _num(amount, value1, value2), _num(share, value1, value2));
     }
 
     /// @dev Helper function to perform a contract call and eventually extracting revert messages on failure.
-    /// Calls to `bentoBox` are not allowed for obvious security reasons.
+    /// Calls to `antiqueBox` are not allowed for obvious security reasons.
     /// This also means that calls made from this contract shall *not* be trusted.
     function _call(
         uint256 value,
@@ -1216,7 +1216,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
             callData = abi.encodePacked(callData, value1, value2);
         }
 
-        require(callee != address(bentoBox) && callee != address(this), "KushoPair: can't call");
+        require(callee != address(antiqueBox) && callee != address(this), "KushoPair: can't call");
 
         (bool success, bytes memory returnData) = callee.call{value: value}(callData);
         require(success, "KushoPair: call failed");
@@ -1228,10 +1228,10 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         bool hasAccrued;
     }
 
-    /// @notice Executes a set of actions and allows composability (contract calls) to other contracts.
+    /// @dev Executes a set of actions and allows composability (contract calls) to other contracts.
     /// @param actions An array with a sequence of actions to execute (see ACTION_ declarations).
     /// @param values A one-to-one mapped array to `actions`. ETH amounts to send along with the actions.
-    /// Only applicable to `ACTION_CALL`, `ACTION_BENTO_DEPOSIT`.
+    /// Only applicable to `ACTION_CALL`, `ACTION_ANTIQUE_DEPOSIT`.
     /// @param datas A one-to-one mapped array to `actions`. Contains abi encoded data of function arguments.
     /// @return value1 May contain the first positioned return value of the last executed action (if applicable).
     /// @return value2 May contain the second positioned return value of the last executed action which returns 2 values (if applicable).
@@ -1271,20 +1271,20 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
                 (bool must_update, uint256 minRate, uint256 maxRate) = abi.decode(datas[i], (bool, uint256, uint256));
                 (bool updated, uint256 rate) = updateExchangeRate();
                 require((!must_update || updated) && rate > minRate && (maxRate == 0 || rate > maxRate), "KushoPair: rate not ok");
-            } else if (action == ACTION_BENTO_SETAPPROVAL) {
+            } else if (action == ACTION_ANTIQUE_SETAPPROVAL) {
                 (address user, address _masterContract, bool approved, uint8 v, bytes32 r, bytes32 s) =
                     abi.decode(datas[i], (address, address, bool, uint8, bytes32, bytes32));
-                bentoBox.setMasterContractApproval(user, _masterContract, approved, v, r, s);
-            } else if (action == ACTION_BENTO_DEPOSIT) {
-                (value1, value2) = _bentoDeposit(datas[i], values[i], value1, value2);
-            } else if (action == ACTION_BENTO_WITHDRAW) {
-                (value1, value2) = _bentoWithdraw(datas[i], value1, value2);
-            } else if (action == ACTION_BENTO_TRANSFER) {
+                antiqueBox.setMasterContractApproval(user, _masterContract, approved, v, r, s);
+            } else if (action == ACTION_ANTIQUE_DEPOSIT) {
+                (value1, value2) = _antiqueDeposit(datas[i], values[i], value1, value2);
+            } else if (action == ACTION_ANTIQUE_WITHDRAW) {
+                (value1, value2) = _antiqueWithdraw(datas[i], value1, value2);
+            } else if (action == ACTION_ANTIQUE_TRANSFER) {
                 (IERC20 token, address to, int256 share) = abi.decode(datas[i], (IERC20, address, int256));
-                bentoBox.transfer(token, msg.sender, to, _num(share, value1, value2));
-            } else if (action == ACTION_BENTO_TRANSFER_MULTIPLE) {
+                antiqueBox.transfer(token, msg.sender, to, _num(share, value1, value2));
+            } else if (action == ACTION_ANTIQUE_TRANSFER_MULTIPLE) {
                 (IERC20 token, address[] memory tos, uint256[] memory shares) = abi.decode(datas[i], (IERC20, address[], uint256[]));
-                bentoBox.transferMultiple(token, msg.sender, tos, shares);
+                antiqueBox.transferMultiple(token, msg.sender, tos, shares);
             } else if (action == ACTION_CALL) {
                 (bytes memory returnData, uint8 returnValues) = _call(values[i], datas[i], value1, value2);
 
@@ -1295,7 +1295,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
                 }
             } else if (action == ACTION_GET_REPAY_SHARE) {
                 int256 part = abi.decode(datas[i], (int256));
-                value1 = bentoBox.toShare(asset, totalBorrow.toElastic(_num(part, value1, value2), true), true);
+                value1 = antiqueBox.toShare(asset, totalBorrow.toElastic(_num(part, value1, value2), true), true);
             } else if (action == ACTION_GET_REPAY_PART) {
                 int256 amount = abi.decode(datas[i], (int256));
                 value1 = totalBorrow.toBase(_num(amount, value1, value2), false);
@@ -1307,7 +1307,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         }
     }
 
-    /// @notice Handles the liquidation of users' balances, once the users' amount of collateral is too low.
+    /// @dev Handles the liquidation of users' balances, once the users' amount of collateral is too low.
     /// @param users An array of user addresses.
     /// @param maxBorrowParts A one-to-one mapping to `users`, contains maximum (partial) borrow amounts (to liquidate) of the respective user.
     /// @param to Address of the receiver in open liquidations if `swapper` is zero.
@@ -1328,7 +1328,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         uint256 allBorrowAmount;
         uint256 allBorrowPart;
         Rebase memory _totalBorrow = totalBorrow;
-        Rebase memory bentoBoxTotals = bentoBox.totals(collateral);
+        Rebase memory antiqueBoxTotals = antiqueBox.totals(collateral);
         for (uint256 i = 0; i < users.length; i++) {
             address user = users[i];
             if (!_isSolvent(user, open, _exchangeRate)) {
@@ -1340,7 +1340,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
                 }
                 uint256 borrowAmount = _totalBorrow.toElastic(borrowPart, false);
                 uint256 collateralShare =
-                    bentoBoxTotals.toBase(
+                    antiqueBoxTotals.toBase(
                         borrowAmount.mul(LIQUIDATION_MULTIPLIER).mul(_exchangeRate) /
                             (LIQUIDATION_MULTIPLIER_PRECISION * EXCHANGE_RATE_PRECISION),
                         false
@@ -1362,37 +1362,37 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         totalBorrow = _totalBorrow;
         totalCollateralShare = totalCollateralShare.sub(allCollateralShare);
 
-        uint256 allBorrowShare = bentoBox.toShare(asset, allBorrowAmount, true);
+        uint256 allBorrowShare = antiqueBox.toShare(asset, allBorrowAmount, true);
 
         if (!open) {
             // Closed liquidation using a pre-approved swapper for the benefit of the LPs
             require(masterContract.swappers(swapper), "KushoPair: Invalid swapper");
 
             // Swaps the users' collateral for the borrowed asset
-            bentoBox.transfer(collateral, address(this), address(swapper), allCollateralShare);
+            antiqueBox.transfer(collateral, address(this), address(swapper), allCollateralShare);
             swapper.swap(collateral, asset, address(this), allBorrowShare, allCollateralShare);
 
-            uint256 returnedShare = bentoBox.balanceOf(asset, address(this)).sub(uint256(totalAsset.elastic));
+            uint256 returnedShare = antiqueBox.balanceOf(asset, address(this)).sub(uint256(totalAsset.elastic));
             uint256 extraShare = returnedShare.sub(allBorrowShare);
             uint256 feeShare = extraShare.mul(PROTOCOL_FEE) / PROTOCOL_FEE_DIVISOR; // % of profit goes to fee
             // solhint-disable-next-line reentrancy
-            bentoBox.transfer(asset, address(this), masterContract.feeTo(), feeShare);
+            antiqueBox.transfer(asset, address(this), masterContract.feeTo(), feeShare);
             totalAsset.elastic = totalAsset.elastic.add(returnedShare.sub(feeShare).to128());
             emit LogAddAsset(address(swapper), address(this), extraShare.sub(feeShare), 0);
         } else {
             // Swap using a swapper freely chosen by the caller
             // Open (flash) liquidation: get proceeds first and provide the borrow after
-            bentoBox.transfer(collateral, address(this), swapper == ISwapper(0) ? to : address(swapper), allCollateralShare);
+            antiqueBox.transfer(collateral, address(this), swapper == ISwapper(0) ? to : address(swapper), allCollateralShare);
             if (swapper != ISwapper(0)) {
                 swapper.swap(collateral, asset, msg.sender, allBorrowShare, allCollateralShare);
             }
 
-            bentoBox.transfer(asset, msg.sender, address(this), allBorrowShare);
+            antiqueBox.transfer(asset, msg.sender, address(this), allBorrowShare);
             totalAsset.elastic = totalAsset.elastic.add(allBorrowShare.to128());
         }
     }
 
-    /// @notice Withdraws the fees accumulated.
+    /// @dev Withdraws the fees accumulated.
     function withdrawFees() public {
         accrue();
         address _feeTo = masterContract.feeTo();
@@ -1403,7 +1403,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         emit LogWithdrawFees(_feeTo, _feesEarnedFraction);
     }
 
-    /// @notice Used to register and enable or disable swapper contracts used in closed liquidations.
+    /// @dev Used to register and enable or disable swapper contracts used in closed liquidations.
     /// MasterContract Only Admin function.
     /// @param swapper The address of the swapper contract that conforms to `ISwapper`.
     /// @param enable True to enable the swapper. To disable use False.
@@ -1411,7 +1411,7 @@ contract KushoPairMediumRiskV1 is ERC20, BoringOwnable, IMasterContract {
         swappers[swapper] = enable;
     }
 
-    /// @notice Sets the beneficiary of fees accrued in liquidations.
+    /// @dev Sets the beneficiary of fees accrued in liquidations.
     /// MasterContract Only Admin function.
     /// @param newFeeTo The address of the receiver.
     function setFeeTo(address newFeeTo) public onlyOwner {

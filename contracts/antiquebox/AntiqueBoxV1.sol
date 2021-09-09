@@ -21,7 +21,7 @@ interface IERC20 {
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 
-    /// @notice EIP 2612
+    /// @dev EIP 2612
     function permit(
         address owner,
         address spender,
@@ -37,7 +37,7 @@ interface IERC20 {
 // License-Identifier: MIT
 
 interface IFlashBorrower {
-    /// @notice The flashloan callback. `amount` + `fee` needs to repayed to msg.sender before this call returns.
+    /// @dev The flashloan callback. `amount` + `fee` needs to repayed to msg.sender before this call returns.
     /// @param sender The address of the invoker of this flashloan.
     /// @param token The address of the token that is loaned.
     /// @param amount of the `token` that is loaned.
@@ -53,7 +53,7 @@ interface IFlashBorrower {
 }
 
 interface IBatchFlashBorrower {
-    /// @notice The callback for batched flashloans. Every amount + fee needs to repayed to msg.sender before this call returns.
+    /// @dev The callback for batched flashloans. Every amount + fee needs to repayed to msg.sender before this call returns.
     /// @param sender The address of the invoker of this flashloan.
     /// @param tokens Array of addresses for ERC-20 tokens that is loaned.
     /// @param amounts A one-to-one map to `tokens` that is loaned.
@@ -81,24 +81,24 @@ interface IWETH {
 // License-Identifier: MIT
 
 interface IStrategy {
-    /// @notice Send the assets to the Strategy and call skim to invest them.
+    /// @dev Send the assets to the Strategy and call skim to invest them.
     /// @param amount The amount of tokens to invest.
     function skim(uint256 amount) external;
 
-    /// @notice Harvest any profits made converted to the asset and pass them to the caller.
+    /// @dev Harvest any profits made converted to the asset and pass them to the caller.
     /// @param balance The amount of tokens the caller thinks it has invested.
     /// @param sender The address of the initiator of this transaction. Can be used for reimbursements, etc.
     /// @return amountAdded The delta (+profit or -loss) that occured in contrast to `balance`.
     function harvest(uint256 balance, address sender) external returns (int256 amountAdded);
 
-    /// @notice Withdraw assets. The returned amount can differ from the requested amount due to rounding.
+    /// @dev Withdraw assets. The returned amount can differ from the requested amount due to rounding.
     /// @dev The `actualAmount` should be very close to the amount.
     /// The difference should NOT be used to report a loss. That's what harvest is for.
     /// @param amount The requested amount the caller wants to withdraw.
     /// @return actualAmount The real amount that is withdrawn.
     function withdraw(uint256 amount) external returns (uint256 actualAmount);
 
-    /// @notice Withdraw all assets in the safest way possible. This shouldn't fail.
+    /// @dev Withdraw all assets in the safest way possible. This shouldn't fail.
     /// @param balance The amount of tokens the caller thinks it has invested.
     /// @return amountAdded The delta (+profit or -loss) that occured in contrast to `balance`.
     function exit(uint256 balance) external returns (int256 amountAdded);
@@ -114,7 +114,7 @@ library BoringERC20 {
     bytes4 private constant SIG_TRANSFER = 0xa9059cbb; // transfer(address,uint256)
     bytes4 private constant SIG_TRANSFER_FROM = 0x23b872dd; // transferFrom(address,address,uint256)
 
-    /// @notice Provides a safe ERC20.transfer version for different ERC-20 implementations.
+    /// @dev Provides a safe ERC20.transfer version for different ERC-20 implementations.
     /// Reverts on a failed transfer.
     /// @param token The address of the ERC-20 token.
     /// @param to Transfer tokens to.
@@ -128,7 +128,7 @@ library BoringERC20 {
         require(success && (data.length == 0 || abi.decode(data, (bool))), "BoringERC20: Transfer failed");
     }
 
-    /// @notice Provides a safe ERC20.transferFrom version for different ERC-20 implementations.
+    /// @dev Provides a safe ERC20.transferFrom version for different ERC-20 implementations.
     /// Reverts on a failed transfer.
     /// @param token The address of the ERC-20 token.
     /// @param from Transfer tokens from.
@@ -148,7 +148,7 @@ library BoringERC20 {
 // File @boringcrypto/boring-solidity/contracts/libraries/BoringMath.sol@v1.2.0
 // License-Identifier: MIT
 
-/// @notice A library for performing overflow-/underflow-safe math,
+/// @dev A library for performing overflow-/underflow-safe math,
 /// updated with awesomeness from of DappHub (https://github.com/dapphub/ds-math).
 library BoringMath {
     function add(uint256 a, uint256 b) internal pure returns (uint256 c) {
@@ -179,7 +179,7 @@ library BoringMath {
     }
 }
 
-/// @notice A library for performing overflow-/underflow-safe addition and subtraction on uint128.
+/// @dev A library for performing overflow-/underflow-safe addition and subtraction on uint128.
 library BoringMath128 {
     function add(uint128 a, uint128 b) internal pure returns (uint128 c) {
         require((c = a + b) >= b, "BoringMath: Add Overflow");
@@ -190,7 +190,7 @@ library BoringMath128 {
     }
 }
 
-/// @notice A library for performing overflow-/underflow-safe addition and subtraction on uint64.
+/// @dev A library for performing overflow-/underflow-safe addition and subtraction on uint64.
 library BoringMath64 {
     function add(uint64 a, uint64 b) internal pure returns (uint64 c) {
         require((c = a + b) >= b, "BoringMath: Add Overflow");
@@ -201,7 +201,7 @@ library BoringMath64 {
     }
 }
 
-/// @notice A library for performing overflow-/underflow-safe addition and subtraction on uint32.
+/// @dev A library for performing overflow-/underflow-safe addition and subtraction on uint32.
 library BoringMath32 {
     function add(uint32 a, uint32 b) internal pure returns (uint32 c) {
         require((c = a + b) >= b, "BoringMath: Add Overflow");
@@ -220,12 +220,12 @@ struct Rebase {
     uint128 base;
 }
 
-/// @notice A rebasing library using overflow-/underflow-safe math.
+/// @dev A rebasing library using overflow-/underflow-safe math.
 library RebaseLibrary {
     using BoringMath for uint256;
     using BoringMath128 for uint128;
 
-    /// @notice Calculates the base value in relationship to `elastic` and `total`.
+    /// @dev Calculates the base value in relationship to `elastic` and `total`.
     function toBase(
         Rebase memory total,
         uint256 elastic,
@@ -241,7 +241,7 @@ library RebaseLibrary {
         }
     }
 
-    /// @notice Calculates the elastic value in relationship to `base` and `total`.
+    /// @dev Calculates the elastic value in relationship to `base` and `total`.
     function toElastic(
         Rebase memory total,
         uint256 base,
@@ -257,7 +257,7 @@ library RebaseLibrary {
         }
     }
 
-    /// @notice Add `elastic` to `total` and doubles `total.base`.
+    /// @dev Add `elastic` to `total` and doubles `total.base`.
     /// @return (Rebase) The new total.
     /// @return base in relationship to `elastic`.
     function add(
@@ -271,7 +271,7 @@ library RebaseLibrary {
         return (total, base);
     }
 
-    /// @notice Sub `base` from `total` and update `total.elastic`.
+    /// @dev Sub `base` from `total` and update `total.elastic`.
     /// @return (Rebase) The new total.
     /// @return elastic in relationship to `base`.
     function sub(
@@ -285,7 +285,7 @@ library RebaseLibrary {
         return (total, elastic);
     }
 
-    /// @notice Add `elastic` and `base` to `total`.
+    /// @dev Add `elastic` and `base` to `total`.
     function add(
         Rebase memory total,
         uint256 elastic,
@@ -296,7 +296,7 @@ library RebaseLibrary {
         return total;
     }
 
-    /// @notice Subtract `elastic` and `base` to `total`.
+    /// @dev Subtract `elastic` and `base` to `total`.
     function sub(
         Rebase memory total,
         uint256 elastic,
@@ -307,13 +307,13 @@ library RebaseLibrary {
         return total;
     }
 
-    /// @notice Add `elastic` to `total` and update storage.
+    /// @dev Add `elastic` to `total` and update storage.
     /// @return newElastic Returns updated `elastic`.
     function addElastic(Rebase storage total, uint256 elastic) internal returns (uint256 newElastic) {
         newElastic = total.elastic = total.elastic.add(elastic.to128());
     }
 
-    /// @notice Subtract `elastic` from `total` and update storage.
+    /// @dev Subtract `elastic` from `total` and update storage.
     /// @return newElastic Returns updated `elastic`.
     function subElastic(Rebase storage total, uint256 elastic) internal returns (uint256 newElastic) {
         newElastic = total.elastic = total.elastic.sub(elastic.to128());
@@ -334,13 +334,13 @@ contract BoringOwnableData {
 contract BoringOwnable is BoringOwnableData {
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    /// @notice `owner` defaults to msg.sender on construction.
+    /// @dev `owner` defaults to msg.sender on construction.
     constructor() public {
         owner = msg.sender;
         emit OwnershipTransferred(address(0), msg.sender);
     }
 
-    /// @notice Transfers ownership to `newOwner`. Either directly or claimable by the new pending owner.
+    /// @dev Transfers ownership to `newOwner`. Either directly or claimable by the new pending owner.
     /// Can only be invoked by the current `owner`.
     /// @param newOwner Address of the new owner.
     /// @param direct True if `newOwner` should be set immediately. False if `newOwner` needs to use `claimOwnership`.
@@ -364,7 +364,7 @@ contract BoringOwnable is BoringOwnableData {
         }
     }
 
-    /// @notice Needs to be called by `pendingOwner` to claim ownership.
+    /// @dev Needs to be called by `pendingOwner` to claim ownership.
     function claimOwnership() public {
         address _pendingOwner = pendingOwner;
 
@@ -377,7 +377,7 @@ contract BoringOwnable is BoringOwnableData {
         pendingOwner = address(0);
     }
 
-    /// @notice Only allows the `owner` to execute the function.
+    /// @dev Only allows the `owner` to execute the function.
     modifier onlyOwner() {
         require(msg.sender == owner, "Ownable: caller is not the owner");
         _;
@@ -388,7 +388,7 @@ contract BoringOwnable is BoringOwnableData {
 // License-Identifier: MIT
 
 interface IMasterContract {
-    /// @notice Init function that gets called from `BoringFactory.deploy`.
+    /// @dev Init function that gets called from `BoringFactory.deploy`.
     /// Also kown as the constructor for cloned contracts.
     /// Any ETH send to `BoringFactory.deploy` ends up here.
     /// @param data Can be abi encoded arguments or anything else.
@@ -401,10 +401,10 @@ interface IMasterContract {
 contract BoringFactory {
     event LogDeploy(address indexed masterContract, bytes data, address indexed cloneAddress);
 
-    /// @notice Mapping from clone contracts to their masterContract.
+    /// @dev Mapping from clone contracts to their masterContract.
     mapping(address => address) public masterContractOf;
 
-    /// @notice Deploys a given master Contract as a clone.
+    /// @dev Deploys a given master Contract as a clone.
     /// Any ETH transferred with this call is forwarded to the new clone.
     /// Emits `LogDeploy`.
     /// @param masterContract The address of the contract to clone.
@@ -456,11 +456,11 @@ contract MasterContractManager is BoringOwnable, BoringFactory {
     event LogSetMasterContractApproval(address indexed masterContract, address indexed user, bool approved);
     event LogRegisterProtocol(address indexed protocol);
 
-    /// @notice masterContract to user to approval state
+    /// @dev masterContract to user to approval state
     mapping(address => mapping(address => bool)) public masterContractApproved;
-    /// @notice masterContract to whitelisted state for approval without signed message
+    /// @dev masterContract to whitelisted state for approval without signed message
     mapping(address => bool) public whitelistedMasterContracts;
-    /// @notice user nonces for masterContract approvals
+    /// @dev user nonces for masterContract approvals
     mapping(address => uint256) public nonces;
 
     bytes32 private constant DOMAIN_SEPARATOR_SIGNATURE_HASH = keccak256("EIP712Domain(string name,uint256 chainId,address verifyingContract)");
@@ -483,7 +483,7 @@ contract MasterContractManager is BoringOwnable, BoringFactory {
     }
 
     function _calculateDomainSeparator(uint256 chainId) private view returns (bytes32) {
-        return keccak256(abi.encode(DOMAIN_SEPARATOR_SIGNATURE_HASH, keccak256("BentoBox V1"), chainId, address(this)));
+        return keccak256(abi.encode(DOMAIN_SEPARATOR_SIGNATURE_HASH, keccak256("AntiqueBox V1"), chainId, address(this)));
     }
 
     // solhint-disable-next-line func-name-mixedcase
@@ -495,13 +495,13 @@ contract MasterContractManager is BoringOwnable, BoringFactory {
         return chainId == DOMAIN_SEPARATOR_CHAIN_ID ? _DOMAIN_SEPARATOR : _calculateDomainSeparator(chainId);
     }
 
-    /// @notice Other contracts need to register with this master contract so that users can approve them for the BentoBox.
+    /// @dev Other contracts need to register with this master contract so that users can approve them for the AntiqueBox.
     function registerProtocol() public {
         masterContractOf[msg.sender] = msg.sender;
         emit LogRegisterProtocol(msg.sender);
     }
 
-    /// @notice Enables or disables a contract for approval without signed message.
+    /// @dev Enables or disables a contract for approval without signed message.
     function whitelistMasterContract(address masterContract, bool approved) public onlyOwner {
         // Checks
         require(masterContract != address(0), "MasterCMgr: Cannot approve 0");
@@ -511,7 +511,7 @@ contract MasterContractManager is BoringOwnable, BoringFactory {
         emit LogWhiteListMasterContract(masterContract, approved);
     }
 
-    /// @notice Approves or revokes a `masterContract` access to `user` funds.
+    /// @dev Approves or revokes a `masterContract` access to `user` funds.
     /// @param user The address of the user that approves or revokes access.
     /// @param masterContract The address who gains or loses access.
     /// @param approved If True approves access. If False revokes access.
@@ -558,8 +558,8 @@ contract MasterContractManager is BoringOwnable, BoringFactory {
                             abi.encode(
                                 APPROVAL_SIGNATURE_HASH,
                                 approved
-                                    ? keccak256("Give FULL access to funds in (and approved to) BentoBox?")
-                                    : keccak256("Revoke access to BentoBox?"),
+                                    ? keccak256("Give FULL access to funds in (and approved to) AntiqueBox?")
+                                    : keccak256("Revoke access to AntiqueBox?"),
                                 user,
                                 masterContract,
                                 approved,
@@ -595,7 +595,7 @@ contract BaseBoringBatchable {
         return abi.decode(_returnData, (string)); // All that remains is the revert string
     }
 
-    /// @notice Allows batched call to self (this contract).
+    /// @dev Allows batched call to self (this contract).
     /// @param calls An array of inputs for each call.
     /// @param revertOnFail If True then reverts after a failed call and stops doing further calls.
     /// @return successes An array indicating the success of a call, mapped one-to-one to `calls`.
@@ -617,7 +617,7 @@ contract BaseBoringBatchable {
 }
 
 contract BoringBatchable is BaseBoringBatchable {
-    /// @notice Call wrapper that performs `ERC20.permit` on `token`.
+    /// @dev Call wrapper that performs `ERC20.permit` on `token`.
     /// Lookup `IERC20.permit`.
     // F6: Parameters can be used front-run the permit and the user's permit will fail (due to nonce or other revert)
     //     if part of a batch this could be used to grief once as the second call would not need the permit
@@ -635,16 +635,16 @@ contract BoringBatchable is BaseBoringBatchable {
     }
 }
 
-// File contracts/BentoBox.sol
+// File contracts/AntiqueBox.sol
 // License-Identifier: UNLICENSED
 
-/// @title BentoBox
+/// @title AntiqueBox
 /// @author BoringCrypto, Keno
-/// @notice The BentoBox is a vault for tokens. The stored tokens can be flash loaned and used in strategies.
+/// @dev The AntiqueBox is a vault for tokens. The stored tokens can be flash loaned and used in strategies.
 /// Yield from this will go to the token depositors.
 /// Rebasing tokens ARE NOT supported and WILL cause loss of funds.
-/// Any funds transfered directly onto the BentoBox will be lost, use the deposit function instead.
-contract BentoBoxV1 is MasterContractManager, BoringBatchable {
+/// Any funds transfered directly onto the AntiqueBox will be lost, use the deposit function instead.
+contract AntiqueBoxV1 is MasterContractManager, BoringBatchable {
     using BoringMath for uint256;
     using BoringMath128 for uint128;
     using BoringERC20 for IERC20;
@@ -675,7 +675,7 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
     struct StrategyData {
         uint64 strategyStartDate;
         uint64 targetPercentage;
-        uint128 balance; // the balance of the strategy that BentoBox thinks is in there
+        uint128 balance; // the balance of the strategy that AntiqueBox thinks is in there
     }
 
     // ******************************** //
@@ -721,7 +721,7 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
 
     /// Modifier to check if the msg.sender is allowed to use funds belonging to the 'from' address.
     /// If 'from' is msg.sender, it's allowed.
-    /// If 'from' is the BentoBox itself, it's allowed. Any ETH, token balances (above the known balances) or BentoBox balances
+    /// If 'from' is the AntiqueBox itself, it's allowed. Any ETH, token balances (above the known balances) or AntiqueBox balances
     /// can be taken by anyone.
     /// This is to enable skimming, not just for deposits, but also for withdrawals or transfers, enabling better composability.
     /// If 'from' is a clone of a masterContract AND the 'from' address has approved that masterContract, it's allowed.
@@ -729,8 +729,8 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
         if (from != msg.sender && from != address(this)) {
             // From is sender or you are skimming
             address masterContract = masterContractOf[msg.sender];
-            require(masterContract != address(0), "BentoBox: no masterContract");
-            require(masterContractApproved[masterContract][from], "BentoBox: Transfer not approved");
+            require(masterContract != address(0), "AntiqueBox: no masterContract");
+            require(masterContractApproved[masterContract][from], "AntiqueBox: Transfer not approved");
         }
         _;
     }
@@ -775,7 +775,7 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
         amount = totals[token].toElastic(share, roundUp);
     }
 
-    /// @notice Deposit an amount of `token` represented in either `amount` or `share`.
+    /// @dev Deposit an amount of `token` represented in either `amount` or `share`.
     /// @param token_ The ERC-20 token to deposit.
     /// @param from which account to pull the tokens.
     /// @param to which account to push the tokens.
@@ -791,14 +791,14 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
         uint256 share
     ) public payable allowed(from) returns (uint256 amountOut, uint256 shareOut) {
         // Checks
-        require(to != address(0), "BentoBox: to not set"); // To avoid a bad UI from burning funds
+        require(to != address(0), "AntiqueBox: to not set"); // To avoid a bad UI from burning funds
 
         // Effects
         IERC20 token = token_ == USE_ETHEREUM ? wethToken : token_;
         Rebase memory total = totals[token];
 
         // If a new token gets added, the tokenSupply call checks that this is a deployed contract. Needed for security.
-        require(total.elastic != 0 || token.totalSupply() > 0, "BentoBox: No tokens");
+        require(total.elastic != 0 || token.totalSupply() > 0, "AntiqueBox: No tokens");
         if (share == 0) {
             // value of the share may be lower than the amount due to rounding, that's ok
             share = total.toBase(amount, false);
@@ -816,7 +816,7 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
         // During flashloans the _tokenBalanceOf is lower than 'reality', so skimming deposits will mostly fail during a flashloan.
         require(
             from != address(this) || token_ == USE_ETHEREUM || amount <= _tokenBalanceOf(token).sub(total.elastic),
-            "BentoBox: Skim too much"
+            "AntiqueBox: Skim too much"
         );
 
         balanceOf[token][to] = balanceOf[token][to].add(share);
@@ -840,7 +840,7 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
         shareOut = share;
     }
 
-    /// @notice Withdraws an amount of `token` from a user account.
+    /// @dev Withdraws an amount of `token` from a user account.
     /// @param token_ The ERC-20 token to withdraw.
     /// @param from which user to pull the tokens.
     /// @param to which user to push the tokens.
@@ -854,7 +854,7 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
         uint256 share
     ) public allowed(from) returns (uint256 amountOut, uint256 shareOut) {
         // Checks
-        require(to != address(0), "BentoBox: to not set"); // To avoid a bad UI from burning funds
+        require(to != address(0), "AntiqueBox: to not set"); // To avoid a bad UI from burning funds
 
         // Effects
         IERC20 token = token_ == USE_ETHEREUM ? wethToken : token_;
@@ -871,7 +871,7 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
         total.elastic = total.elastic.sub(amount.to128());
         total.base = total.base.sub(share.to128());
         // There have to be at least 1000 shares left to prevent reseting the share/amount ratio (unless it's fully emptied)
-        require(total.base >= MINIMUM_SHARE_BALANCE || total.base == 0, "BentoBox: cannot empty");
+        require(total.base >= MINIMUM_SHARE_BALANCE || total.base == 0, "AntiqueBox: cannot empty");
         totals[token] = total;
 
         // Interactions
@@ -880,7 +880,7 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
             IWETH(address(wethToken)).withdraw(amount);
             // X2, X3: A revert or big gas usage could block, however, the to address is under control of the caller.
             (bool success, ) = to.call{value: amount}("");
-            require(success, "BentoBox: ETH transfer failed");
+            require(success, "AntiqueBox: ETH transfer failed");
         } else {
             // X2, X3: A malicious token could block withdrawal of just THAT token.
             //         masterContracts may want to take care not to rely on withdraw always succeeding.
@@ -891,7 +891,7 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
         shareOut = share;
     }
 
-    /// @notice Transfer shares from a user account to another one.
+    /// @dev Transfer shares from a user account to another one.
     /// @param token The ERC-20 token to transfer.
     /// @param from which user to pull the tokens.
     /// @param to which user to push the tokens.
@@ -906,7 +906,7 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
         uint256 share
     ) public allowed(from) {
         // Checks
-        require(to != address(0), "BentoBox: to not set"); // To avoid a bad UI from burning funds
+        require(to != address(0), "AntiqueBox: to not set"); // To avoid a bad UI from burning funds
 
         // Effects
         balanceOf[token][from] = balanceOf[token][from].sub(share);
@@ -915,7 +915,7 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
         emit LogTransfer(token, from, to, share);
     }
 
-    /// @notice Transfer shares from a user account to multiple other ones.
+    /// @dev Transfer shares from a user account to multiple other ones.
     /// @param token The ERC-20 token to transfer.
     /// @param from which user to pull the tokens.
     /// @param tos The receivers of the tokens.
@@ -929,7 +929,7 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
         uint256[] calldata shares
     ) public allowed(from) {
         // Checks
-        require(tos[0] != address(0), "BentoBox: to[0] not set"); // To avoid a bad UI from burning funds
+        require(tos[0] != address(0), "AntiqueBox: to[0] not set"); // To avoid a bad UI from burning funds
 
         // Effects
         uint256 totalAmount;
@@ -943,7 +943,7 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
         balanceOf[token][from] = balanceOf[token][from].sub(totalAmount);
     }
 
-    /// @notice Flashloan ability.
+    /// @dev Flashloan ability.
     /// @param borrower The address of the contract that implements and conforms to `IFlashBorrower` and handles the flashloan.
     /// @param receiver Address of the token receiver.
     /// @param token The address of the token to receive.
@@ -965,11 +965,11 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
 
         borrower.onFlashLoan(msg.sender, token, amount, fee, data);
 
-        require(_tokenBalanceOf(token) >= totals[token].addElastic(fee.to128()), "BentoBox: Wrong amount");
+        require(_tokenBalanceOf(token) >= totals[token].addElastic(fee.to128()), "AntiqueBox: Wrong amount");
         emit LogFlashLoan(address(borrower), token, amount, fee, receiver);
     }
 
-    /// @notice Support for batched flashloans. Useful to request multiple different `tokens` in a single transaction.
+    /// @dev Support for batched flashloans. Useful to request multiple different `tokens` in a single transaction.
     /// @param borrower The address of the contract that implements and conforms to `IBatchFlashBorrower` and handles the flashloan.
     /// @param receivers An array of the token receivers. A one-to-one mapping with `tokens` and `amounts`.
     /// @param tokens The addresses of the tokens.
@@ -1000,12 +1000,12 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
 
         for (uint256 i = 0; i < len; i++) {
             IERC20 token = tokens[i];
-            require(_tokenBalanceOf(token) >= totals[token].addElastic(fees[i].to128()), "BentoBox: Wrong amount");
+            require(_tokenBalanceOf(token) >= totals[token].addElastic(fees[i].to128()), "AntiqueBox: Wrong amount");
             emit LogFlashLoan(address(borrower), token, amounts[i], fees[i], receivers[i]);
         }
     }
 
-    /// @notice Sets the target percentage of the strategy for `token`.
+    /// @dev Sets the target percentage of the strategy for `token`.
     /// @dev Only the owner of this contract is allowed to change this.
     /// @param token The address of the token that maps to a strategy to change.
     /// @param targetPercentage_ The new target in percent. Must be lesser or equal to `MAX_TARGET_PERCENTAGE`.
@@ -1018,7 +1018,7 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
         emit LogStrategyTargetPercentage(token, targetPercentage_);
     }
 
-    /// @notice Sets the contract address of a new strategy that conforms to `IStrategy` for `token`.
+    /// @dev Sets the contract address of a new strategy that conforms to `IStrategy` for `token`.
     /// Must be called twice with the same arguments.
     /// A new strategy becomes pending first and can be activated once `STRATEGY_DELAY` is over.
     /// @dev Only the owner of this contract is allowed to change this.
@@ -1063,7 +1063,7 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
         strategyData[token] = data;
     }
 
-    /// @notice The actual process of yield farming. Executes the strategy of `token`.
+    /// @dev The actual process of yield farming. Executes the strategy of `token`.
     /// Optionally does housekeeping if `balance` is true.
     /// `maxChangeAmount` is relevant for skimming or withdrawing if `balance` is true.
     /// @param token The address of the token for which a strategy is deployed.
@@ -1071,7 +1071,7 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
     /// @param maxChangeAmount The maximum amount for either pulling or pushing from/to the `IStrategy` contract.
     // F5 - Checks-Effects-Interactions pattern followed? (SWC-107)
     // F5: Total amount is updated AFTER interaction. But strategy is under our control.
-    // F5: Not followed to prevent reentrancy issues with flashloans and BentoBox skims?
+    // F5: Not followed to prevent reentrancy issues with flashloans and AntiqueBox skims?
     function harvest(
         IERC20 token,
         bool balance,
@@ -1094,7 +1094,7 @@ contract BentoBoxV1 is MasterContractManager, BoringBatchable {
         } else if (balanceChange < 0) {
             // C1 - All math done through BoringMath (SWC-101)
             // C1: balanceChange could overflow if it's max negative int128.
-            // But tokens with balances that large are not supported by the BentoBox.
+            // But tokens with balances that large are not supported by the AntiqueBox.
             uint256 sub = uint256(-balanceChange);
             totalElastic = totalElastic.sub(sub);
             totals[token].elastic = totalElastic.to128();
