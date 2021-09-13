@@ -1,4 +1,4 @@
-const { ChainId } = require("@polycity/sdk")
+const { ChainId } = require("@sushiswap/sdk")
 
 
 const PICHI = {

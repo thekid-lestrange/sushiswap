@@ -1,4 +1,4 @@
-const { WETH } = require("@polycity/sdk")
+const { WETH } = require("@sushiswap/sdk")
 
 module.exports = async function ({ ethers: { getNamedSigner }, getNamedAccounts, deployments }) {
   const { deploy } = deployments
