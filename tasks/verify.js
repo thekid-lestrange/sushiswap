@@ -1,71 +1,19 @@
-const {
-    WETH
-} = require("@sushiswap/sdk")
 module.exports = async function ({
     ethers,
     deployments,
     getNamedAccounts
 }) {
-    const {
-        deployer,
-        dev
-    } = await getNamedAccounts()
-    const chainId = await getChainId()
-    let wethAddress;
 
-    if (chainId === '31337') {
-        wethAddress = (await deployments.get("WETH9Mock")).address
-    } else if (chainId in WETH) {
-        wethAddress = WETH[chainId].address
-    } else {
-        throw Error("No WETH!")
-    }
-    const masterChef = await ethers.getContract("MasterChef").address
-    const miniChef = await ethers.getContract("MiniChefV2").address
-    const multicall2 = await ethers.getContract("Multicall2").address
-    const pichiMaker = await ethers.getContract("PichiMaker").address
-    const pichiRoll = await ethers.getContract("PichiRoll").address
-    const polyCityToken = await ethers.getContract("PolyCityDexToken").address
-    const polyCityHall = await ethers.getContract("PolyCityHall").address
-    const uniswapV2Factory = await ethers.getContract("UniswapV2Factory").address
-    const uniswapV2Router = await ethers.getContract("UniswapV2Router02").address
-    const timeLock = await ethers.getContract("Timelock").address
-    await hre.run("verify:verify", {
-        address: masterChef,
-        constructorArguments: [polyCityToken, dev, "1000000000000000", "0", "1000000000000000000000"],
+
+    const factory = await ethers.getContract("UniswapV2Factory")
+    const pichi = (await deployments.get("PolyCityDexToken")).address
+    console.log("Print Factory Contract", pichi)
+    //console.log("Print Factory Address", factory.address)
+    await run("verify:verify", {
+        contract: "contracts/uniswapv2/UniswapV2Router02.sol:UniswapV2Router02",
+        address: "0x007Fe3167E794f255651e2d6723351DB6101c1b5",
+        constructorArguments: ["0x7Af7A3fBFE2912C600539d1B10A936091B19b3FF", "0x5B67676a984807a212b1c59eBFc9B3568a474F0a"],
     });
-    await hre.run("verify:verify", {
-        address: miniChef,
-        constructorArguments: [polyCityToken],
-    });
-    await hre.run("verify:verify", {
-        address: multicall2,
-    });
-    await hre.run("verify:verify", {
-        address: pichiMaker,
-        constructorArguments: [uniswapV2Factory, polyCityHall, polyCityToken, wethAddress],
-    });
-    await hre.run("verify:verify", {
-        address: pichiRoll,
-        constructorArguments: [uniswapV2Factory, uniswapV2Factory],
-    });
-    await hre.run("verify:verify", {
-        address: polyCityHall,
-        constructorArguments: [polyCityToken],
-    });
-    await hre.run("verify:verify", {
-        address: polyCityToken,
-    });
-    await hre.run("verify:verify", {
-        address: uniswapV2Factory,
-        constructorArguments: [dev],
-    });
-    await hre.run("verify:verify", {
-        address: uniswapV2Router,
-        constructorArguments: [uniswapV2Factory, wethAddress],
-    });
-    await hre.run("verify:verify", {
-        address: timeLock,
-        constructorArguments: [deployer, "84000"],
-    });
-}
+};
+
+module.exports.tags = ["UniswapV2Factory", "AMM"];

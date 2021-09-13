@@ -41,7 +41,20 @@ module.exports = async function ({
     console.log("Transfer ownership of MasterChef to dev")
     await (await masterChef.transferOwnership(dev)).wait()
   }
-}
+  const masterAddress = (await deployments.get("MasterChef")).address;
+  if (masterAddress) {
+    console.log("Start verify MasterChef Source code", masterAddress)
+    try {
+      await run("verify:verify", {
+        contract: "contracts/MasterChef.sol:MasterChef",
+        address: masterAddress,
+        constructorArguments: [pichi.address, dev, "1000000000000000", "0", "1000000000000000000000"],
+      });
+    } catch (e) {
+      console.log(`Failed to verify contract: ${e}`);
+    }
+  };
+};
 
 module.exports.tags = ["MasterChef"]
 module.exports.dependencies = ["UniswapV2Factory", "UniswapV2Router02", "PolyCityDexToken"]

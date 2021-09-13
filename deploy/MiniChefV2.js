@@ -1,24 +1,30 @@
-const { ChainId } = require("@sushiswap/sdk")
-
-
+const {
+  ChainId
+} = require("@sushiswap/sdk")
 const PICHI = {
-  [ChainId.MATIC]: '0x0b3F868E0BE5597D5DB7fEB59E1CADBb0fdDa50a'
+  [ChainId.MATIC]: '0x0b3F868E0BE5597D5DB7fEB59E1CADBb0fdDa50a',
+  [ChainId.MATIC_TESTNET]: '0xe23c7e19B29F6f206F2A0DdeE7324E1a467dd335'
 }
 
-module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
-  const { deploy } = deployments
+module.exports = async function ({
+  ethers,
+  deployments,
+  getNamedAccounts
+}) {
+  const {
+    deploy
+  } = deployments
 
-  const { deployer, dev } = await getNamedAccounts()
+  const {
+    deployer,
+    dev
+  } = await getNamedAccounts()
 
   const chainId = await getChainId()
 
-  let pichiAddress;
+  let pichiAddress = (await deployments.get("PolyCityDexToken")).address;
 
-  if (chainId === '31337') {
-    pichiAddress = (await deployments.get("PolyCityDexToken")).address
-  } else if (chainId in PICHI) {
-    pichiAddress = PICHI[chainId]
-  } else {
+  if (!pichiAddress) {
     throw Error("No PICHI!")
   }
 
@@ -34,7 +40,19 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
     console.log("Transfer ownership of MiniChef to dev")
     await (await miniChefV2.transferOwnership(dev, true, false)).wait()
   }
-}
+  const miniAddress = (await deployments.get("MiniChefV2")).address;
+  if (miniAddress) {
+    console.log("Start verify MiniChefV2 Source code", miniAddress)
+    try {
+      await run("verify:verify", {
+        contract: "contracts/MiniChefV2.sol:MiniChefV2",
+        address: miniAddress,
+        constructorArguments: [pichiAddress],
+      });
+    } catch (e) {
+      console.log(`Failed to verify contract: ${e}`);
+    }
+  };
+};
 
 module.exports.tags = ["MiniChefV2"]
-// module.exports.dependencies = ["UniswapV2Factory", "UniswapV2Router02"]
