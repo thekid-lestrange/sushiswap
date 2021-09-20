@@ -1,4 +1,4 @@
-const INIT_CODE_HASH = "0x926c6bca5c0ebebd19fe393d3e0510704b322f32107df5ffe7919f50713a5c33"
+const INIT_CODE_HASH = "0x5f1a38b4b874e3bf854dc01750bdab8bbdbaf5cd32ab74e3a38733f6df4a1f7e"
 import { bytecode } from '../artifacts/contracts/uniswapv2/UniswapV2Pair.sol/UniswapV2Pair.json'
 import { keccak256 } from '@ethersproject/solidity'
 import { expect } from "chai";
